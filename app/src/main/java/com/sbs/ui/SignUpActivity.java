@@ -16,6 +16,7 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         EdgeToEdge.enable(this);
 
         binding = ActivitySignUpBinding.inflate(getLayoutInflater());
@@ -41,6 +42,7 @@ public class SignUpActivity extends AppCompatActivity {
             sessionManager.setLoggedIn(true);
 
             Intent intent = new Intent(SignUpActivity.this, DashboardActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
@@ -48,6 +50,6 @@ public class SignUpActivity extends AppCompatActivity {
         binding.tvBackToLogin.setOnClickListener(v -> finish());
 
         binding.tvNeedHelp.setOnClickListener(v ->
-                Toast.makeText(this, "Help flow not implemented yet", Toast.LENGTH_SHORT).show());
+                Toast.makeText(this, "Help may not get a filler arc, yet!", Toast.LENGTH_SHORT).show());
     }
 }
