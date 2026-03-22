@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    res/xml/file_paths.xml
+    ──────────────────────
+    Tells FileProvider which directories it is allowed to share URIs for.
+
+    <external-files-path> maps to Context.getExternalFilesDir(), which is:
+        /sdcard/Android/data/com.sbs/files/Pictures/
+
+    This is the exact directory used in ImageClassifierActivity.launchCamera():
+        getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+
+    No READ_EXTERNAL_STORAGE permission is needed for this path because it
+    lives inside the app's own scoped storage area.
+-->
+<paths>
+    <external-files-path
+        name="camera_images"
+        path="Pictures/" />
+</paths>

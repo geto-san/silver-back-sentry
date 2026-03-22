@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ── CAMERA PERMISSION ────────────────────────────────────────────────
+         Required for the "Take Photo" button in ImageClassifierActivity.
+         Android 6.0+ (API 23+) also requires a runtime permission request,
+         which is handled in ImageClassifierActivity.requestCameraAndCapture().
+    -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Sbs">
+
+        <!-- ── EXISTING ACTIVITIES (unchanged) ─────────────────────────── -->
+
+        <activity
+            android:name=".ui.DashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.WelcomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ── NEW: ImageClassifierActivity ────────────────────────────────
+             Launched from DashboardActivity when the user taps "Identify Image".
+        -->
+        <activity
+            android:name=".ui.ImageClassifierActivity"
+            android:exported="false" />
+
+        <!-- ── NEW: FileProvider ────────────────────────────────────────────
+             Needed so the camera app can write a full-resolution photo to our
+             app's private external storage (required on Android 7+ / API 24+).
+
+             android:authorities  — must match the string used in
+                                    FileProvider.getUriForFile() inside
+                                    ImageClassifierActivity.launchCamera():
+                                    getPackageName() + ".fileprovider"
+
+             android:exported     — must be false for security; the camera app
+                                    receives a one-time URI grant instead.
+
+             android:grantUriPermissions — allows us to grant the camera app
+                                    temporary write access to the URI.
+
+             The <meta-data> tag points at res/xml/file_paths.xml which declares
+             which directories the FileProvider is allowed to share.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+
+</manifest>
