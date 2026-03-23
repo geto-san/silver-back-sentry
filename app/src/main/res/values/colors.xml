@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <color name="ig_blue">#0095F6</color>
+    <color name="ig_light_blue">#B2DFFC</color>
+    <color name="ig_grey">#8E8E8E</color>
+    <color name="ig_light_grey">#DBDBDB</color>
+    <color name="ig_very_light_grey">#FAFAFA</color>
+    <color name="ig_red">#ED4956</color>
+
+    <color name="primaryColor">#FFFFFF</color>
+    <color name="primaryLightColor">#FFFFFF</color>
+    <color name="primaryDarkColor">#FAFAFA</color>
+    <color name="secondaryColor">#0095F6</color>
+    <color name="primaryTextColor">#262626</color>
+    <color name="secondaryTextColor">#8E8E8E</color>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- New colors for the redesigned menu -->
+    <color name="menu_background">#1A1A1A</color>
+    <color name="menu_text_white">#FFFFFF</color>
+    <color name="menu_text_secondary">#B0B0B0</color>
+    <color name="menu_icon_pale">#CCFFFFFF</color>
+
+    <color name="primaryTextColor_day">#111111</color>
+    <color name="secondaryTextColor_day">#757575</color>
+    <color name="ig_light_grey_day">#E6E6E6</color>
+    <color name="ig_very_light_grey_day">#F5F5F5</color>
 </resources>

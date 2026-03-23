@@ -1,0 +1,15 @@
+<resources>
+    <attr name="screenBackground" format="color" />
+    <attr name="toolbarBackground" format="color" />
+    <attr name="primaryTextColor" format="color" />
+    <attr name="secondaryTextColor" format="color" />
+    <attr name="dividerColor" format="color" />
+    <attr name="iconTintColor" format="color" />
+    <attr name="previewSurfaceColor" format="color" />
+
+    <attr name="menuBackground" format="color" />
+    <attr name="menuTextColor" format="color" />
+    <attr name="menuSecondaryTextColor" format="color" />
+    <attr name="menuIconTint" format="color" />
+    <attr name="menuDividerColor" format="color" />
+</resources>

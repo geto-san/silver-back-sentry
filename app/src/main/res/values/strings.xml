@@ -1,15 +1,17 @@
 <resources>
-    <string name="app_name">sbs</string>
-    <string name="login_activity_placeholder">Login Activity Placeholder</string>
-    <string name="sign_up_activity_placeholder">Sign Up Activity Placeholder</string>
-    <string name="password_icon">Password icon</string>
+    <string name="app_name">Silver Back Sentry</string>
+    <string name="silver_back_sentry">Silver Back Sentry</string>
+    <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="get_started">Get Started</string>
     <string name="create_account">Create Account</string>
     <string name="need_help">Need Help?</string>
-    <string name="username">Username</string>
+    <string name="login_screen_bg">Login background</string>
     <string name="username_icon">Username icon</string>
-    <string name="silver_back_sentry">Silver Back Sentry</string>
-    <string name="login_screen_bg">login_screen_bg</string>
-    <string name="back_to_login">Back to Login</string>
+    <string name="password_icon">Password icon</string>
+    <string name="open_menu">Open menu</string>
+    <string name="close_menu">Close menu</string>
+    <string name="profile">Profile</string>
+    <string name="go_back">Go back</string>
+    <string name="selected_image_preview">Selected image preview</string>
 </resources>

@@ -1,4 +1,1 @@
-// This file was manually created and is shadowing the generated ViewBinding class.
-// It should be deleted.
-package com.sbs.databinding.manual;
-public class ActivityWelcomeBinding {}
+// This file was removed to fix a duplicate class error with the generated ViewBinding class.

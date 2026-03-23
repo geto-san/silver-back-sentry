@@ -49,7 +49,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         binding.tvBackToLogin.setOnClickListener(v -> finish());
 
-        binding.tvNeedHelp.setOnClickListener(v ->
-                Toast.makeText(this, "Help may not get a filler arc, yet!", Toast.LENGTH_SHORT).show());
+//        binding.tvNeedHelp.setOnClickListener(v ->
+//                Toast.makeText(this, "Help may not get a filler arc, yet!", Toast.LENGTH_SHORT).show());
     }
 }
