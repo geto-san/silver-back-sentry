@@ -1,0 +1,6 @@
+<resources>
+    <color name="primaryTextColor_day">#FFFFFF</color>
+    <color name="secondaryTextColor_day">#B3FFFFFF</color>
+    <color name="ig_light_grey_day">#26FFFFFF</color>
+    <color name="ig_very_light_grey_day">#121212</color>
+</resources>

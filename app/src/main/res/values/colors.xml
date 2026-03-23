@@ -22,4 +22,9 @@
     <color name="menu_text_white">#FFFFFF</color>
     <color name="menu_text_secondary">#B0B0B0</color>
     <color name="menu_icon_pale">#CCFFFFFF</color>
+
+    <color name="primaryTextColor_day">#111111</color>
+    <color name="secondaryTextColor_day">#757575</color>
+    <color name="ig_light_grey_day">#E6E6E6</color>
+    <color name="ig_very_light_grey_day">#F5F5F5</color>
 </resources>

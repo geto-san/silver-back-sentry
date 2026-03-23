@@ -3,7 +3,7 @@
     <style name="Theme.Sbs" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryVariant">@color/white</item>
-        <item name="colorOnPrimary">@color/primaryTextColor</item>
+        <item name="colorOnPrimary">@color/primaryTextColor_day</item>
 
         <item name="colorSecondary">@color/ig_blue</item>
         <item name="colorSecondaryVariant">@color/ig_blue</item>
@@ -11,22 +11,31 @@
 
         <item name="android:statusBarColor">@color/white</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowBackground">?attr/screenBackground</item>
+
+        <!-- Global screen colors -->
+        <item name="screenBackground">@color/white</item>
+        <item name="toolbarBackground">@android:color/transparent</item>
+        <item name="primaryTextColor">@color/primaryTextColor_day</item>
+        <item name="secondaryTextColor">@color/secondaryTextColor_day</item>
+        <item name="dividerColor">@color/ig_light_grey_day</item>
+        <item name="iconTintColor">@color/primaryTextColor_day</item>
+        <item name="previewSurfaceColor">@color/ig_very_light_grey_day</item>
 
         <!-- Drawer/menu -->
         <item name="menuBackground">@color/white</item>
-        <item name="menuTextColor">@color/primaryTextColor</item>
-        <item name="menuSecondaryTextColor">@color/secondaryTextColor</item>
-        <item name="menuIconTint">@color/primaryTextColor</item>
-        <item name="menuDividerColor">@color/ig_light_grey</item>
+        <item name="menuTextColor">@color/primaryTextColor_day</item>
+        <item name="menuSecondaryTextColor">@color/secondaryTextColor_day</item>
+        <item name="menuIconTint">@color/primaryTextColor_day</item>
+        <item name="menuDividerColor">@color/ig_light_grey_day</item>
     </style>
 
     <style name="InstagramEditText" parent="Widget.AppCompat.EditText">
         <item name="android:background">@drawable/bg_ig_input</item>
         <item name="android:padding">12dp</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/primaryTextColor</item>
-        <item name="android:textColorHint">@color/ig_grey</item>
+        <item name="android:textColor">?attr/primaryTextColor</item>
+        <item name="android:textColorHint">?attr/secondaryTextColor</item>
     </style>
 
     <style name="InstagramButton" parent="Widget.MaterialComponents.Button">
