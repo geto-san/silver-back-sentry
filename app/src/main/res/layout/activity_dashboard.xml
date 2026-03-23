@@ -113,8 +113,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Side-out menu panel (Navigation Drawer) -->
-    <!-- Side-out menu panel (Polished / theme-safe navigation drawer) -->
+    <!-- menu panel (Navigation Drawer) -->
     <LinearLayout
         android:id="@+id/sidePanel"
         android:layout_width="300dp"
