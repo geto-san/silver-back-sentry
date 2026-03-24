@@ -60,6 +60,10 @@ dependencies {
     // ML Kit on-device image labeling
     implementation("com.google.mlkit:image-labeling:17.0.9")
 
+    // Lightweight image loading for profile avatars
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -4,9 +4,11 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,8 +21,12 @@ import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.sbs.R;
 import com.sbs.SessionManager;
 import com.sbs.data.AppSettingsManager;
 import com.sbs.databinding.ActivityDashboardBinding;
@@ -111,6 +117,8 @@ public class DashboardActivity extends BaseActivity {
 
         binding = ActivityDashboardBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        bindCurrentUserFooter();
 
         // Capture original padding for sidePanel to preserve layout design
         int originalLeft = binding.sidePanel.getPaddingLeft();
@@ -476,6 +484,89 @@ public class DashboardActivity extends BaseActivity {
 
         binding.btnIdentifyImage.setOnClickListener(v ->
                 startActivity(new Intent(DashboardActivity.this, ImageClassifierActivity.class)));
+    }
+
+    private void bindCurrentUserFooter() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String displayName = null;
+        String email = null;
+        Uri photoUrl = null;
+
+        if (user != null) {
+            displayName = user.getDisplayName();
+            email = user.getEmail();
+            photoUrl = user.getPhotoUrl();
+        }
+
+        String resolvedName = resolveDisplayName(displayName, email);
+        binding.tvUserName.setText(resolvedName);
+
+        if (photoUrl != null) {
+            Glide.with(this)
+                    .load(photoUrl)
+                    .placeholder(R.drawable.bg_dashboard_avatar)
+                    .error(R.drawable.bg_dashboard_avatar)
+                    .into(binding.ivUserAvatar);
+        } else {
+            binding.ivUserAvatar.setImageResource(R.drawable.bg_dashboard_avatar);
+        }
+
+        if (user != null && TextUtils.isEmpty(displayName)) {
+            FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(user.getUid())
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        String fullName = snapshot.getString("fullName");
+                        if (!TextUtils.isEmpty(fullName)) {
+                            binding.tvUserName.setText(fullName);
+                        }
+                    })
+                    .addOnFailureListener(e ->
+                            Log.w("DashboardUser", "Failed to load user profile", e));
+        }
+    }
+
+    private String resolveDisplayName(String displayName, String email) {
+        if (!TextUtils.isEmpty(displayName)) {
+            return displayName;
+        }
+
+        if (!TextUtils.isEmpty(email)) {
+            return formatNameFromEmail(email);
+        }
+
+        return "User";
+    }
+
+    private String formatNameFromEmail(String email) {
+        String prefix = email;
+        int atIndex = email.indexOf('@');
+        if (atIndex > 0) {
+            prefix = email.substring(0, atIndex);
+        }
+
+        String[] parts = prefix.replace('.', ' ')
+                .replace('_', ' ')
+                .replace('-', ' ')
+                .trim()
+                .split("\\s+");
+
+        StringBuilder formatted = new StringBuilder();
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            if (formatted.length() > 0) {
+                formatted.append(' ');
+            }
+            formatted.append(Character.toUpperCase(part.charAt(0)));
+            if (part.length() > 1) {
+                formatted.append(part.substring(1));
+            }
+        }
+
+        return formatted.length() > 0 ? formatted.toString() : "User";
     }
 
     private void centerMapOnUser() {

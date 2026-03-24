@@ -390,7 +390,7 @@
                         android:layout_marginStart="24dp"
                         android:includeFontPadding="false"
                         android:letterSpacing="0.06"
-                        android:text="DEVICE INFO"
+                        android:text="@string/device_info"
                         android:textColor="?attr/menuTextColor"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -429,7 +429,7 @@
                         android:layout_marginStart="24dp"
                         android:includeFontPadding="false"
                         android:letterSpacing="0.06"
-                        android:text="SETTINGS"
+                        android:text="@string/settings"
                         android:textColor="?attr/menuTextColor"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -475,7 +475,7 @@
                         android:layout_height="wrap_content"
                         android:includeFontPadding="false"
                         android:letterSpacing="0.08"
-                        android:text="LOG OUT"
+                        android:text="@string/log_out"
                         android:textColor="?attr/menuTextColor"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -486,7 +486,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:includeFontPadding="false"
-                        android:text="Test User Nim"
+                        android:text="@string/test_user_nim"
                         android:textColor="?attr/menuSecondaryTextColor"
                         android:textSize="14sp" />
                 </LinearLayout>

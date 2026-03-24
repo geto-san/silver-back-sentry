@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.sbs.databinding.ActivitySignUpBinding;
 
@@ -76,8 +77,19 @@ public class SignUpActivity extends BaseActivity {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
+                        if (auth.getCurrentUser() == null) {
+                            binding.btnSignUp.setEnabled(true);
+                            Toast.makeText(this, "Sign up failed. Please try again.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
                         String userId = auth.getCurrentUser().getUid();
-                        saveUserToFirestore(userId, fullName, email);
+                        UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(fullName)
+                                .build();
+
+                        auth.getCurrentUser().updateProfile(profileUpdate)
+                                .addOnCompleteListener(updateTask -> saveUserToFirestore(userId, fullName, email));
                     } else {
                         binding.btnSignUp.setEnabled(true);
                         Exception e = task.getException();
