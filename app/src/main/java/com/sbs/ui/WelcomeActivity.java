@@ -1,34 +1,30 @@
 package com.sbs.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.sbs.R;
-import android.content.Intent;
+import com.google.firebase.auth.FirebaseAuth;
 import com.sbs.databinding.ActivityWelcomeBinding;
 
-public class WelcomeActivity extends AppCompatActivity {
+public class WelcomeActivity extends BaseActivity {
     private ActivityWelcomeBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        
+
+        // Check if user is already logged in
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            startActivity(new Intent(WelcomeActivity.this, DashboardActivity.class));
+            finish();
+            return;
+        }
+
         binding = ActivityWelcomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        applyWindowInsets(binding.getRoot());
 
         showInitialState();
 

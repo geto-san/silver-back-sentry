@@ -2,12 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ── CAMERA PERMISSION ────────────────────────────────────────────────
-         Required for the "Take Photo" button in ImageClassifierActivity.
-         Android 6.0+ (API 23+) also requires a runtime permission request,
-         which is handled in ImageClassifierActivity.requestCameraAndCapture().
-    -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:node="replace" />
 
     <application
         android:allowBackup="true"
@@ -19,10 +26,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sbs">
 
-        <!-- ── EXISTING ACTIVITIES (unchanged) ─────────────────────────── -->
-
         <activity
             android:name=".ui.DashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SightingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SightingEditorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.HealthObservationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SyncStatusActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.DeviceInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".ui.SignUpActivity"
@@ -42,31 +65,22 @@
             </intent-filter>
         </activity>
 
-        <!-- ── NEW: ImageClassifierActivity ────────────────────────────────
-             Launched from DashboardActivity when the user taps "Identify Image".
-        -->
         <activity
             android:name=".ui.ImageClassifierActivity"
             android:exported="false" />
 
-        <!-- ── NEW: FileProvider ────────────────────────────────────────────
-             Needed so the camera app can write a full-resolution photo to our
-             app's private external storage (required on Android 7+ / API 24+).
+        <service
+            android:name=".notifications.SbsFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
-             android:authorities  — must match the string used in
-                                    FileProvider.getUriForFile() inside
-                                    ImageClassifierActivity.launchCamera():
-                                    getPackageName() + ".fileprovider"
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
 
-             android:exported     — must be false for security; the camera app
-                                    receives a one-time URI grant instead.
-
-             android:grantUriPermissions — allows us to grant the camera app
-                                    temporary write access to the URI.
-
-             The <meta-data> tag points at res/xml/file_paths.xml which declares
-             which directories the FileProvider is allowed to share.
-        -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

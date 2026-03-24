@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.sbs.ui.WelcomeActivity;
 import com.sbs.ui.DashboardActivity;
 
@@ -13,13 +14,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SessionManager sessionManager = new SessionManager(this);
+        boolean hasUser = FirebaseAuth.getInstance().getCurrentUser() != null;
 
         Intent intent;
-        if (!sessionManager.hasOpenedBefore()) {
-            sessionManager.setHasOpenedBefore(true);
-            intent = new Intent(this, WelcomeActivity.class);
-        } else if (sessionManager.isLoggedIn()) {
+        if (hasUser) {
             intent = new Intent(this, DashboardActivity.class);
         } else {
             intent = new Intent(this, WelcomeActivity.class);
