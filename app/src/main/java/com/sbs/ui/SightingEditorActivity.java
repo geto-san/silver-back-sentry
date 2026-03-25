@@ -5,97 +5,78 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.sbs.R;
+import com.sbs.data.AppSettingsManager;
 import com.sbs.data.SightingRecord;
 import com.sbs.data.SightingStore;
 import com.sbs.data.SightingSyncManager;
 
-public class SightingEditorActivity extends AppCompatActivity {
-
-    public static final String EXTRA_LAT = "extra_lat";
-    public static final String EXTRA_LNG = "extra_lng";
-    public static final String EXTRA_SIGHTING_ID = "extra_sighting_id";
+public class SightingEditorActivity extends BaseActivity {
 
     private TextInputEditText etTitle;
-    private TextInputEditText etLatitude;
-    private TextInputEditText etLongitude;
     private TextInputEditText etNotes;
+    private TextInputEditText etRadius;
+    private double lat;
+    private double lng;
+    private AppSettingsManager appSettingsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sighting_editor);
+        applyWindowInsets(findViewById(R.id.toolbar).getRootView());
+
+        appSettingsManager = new AppSettingsManager(this);
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
         etTitle = findViewById(R.id.etSightingTitle);
-        etLatitude = findViewById(R.id.etLatitude);
-        etLongitude = findViewById(R.id.etLongitude);
         etNotes = findViewById(R.id.etNotes);
+        etRadius = findViewById(R.id.etRadius);
         MaterialButton btnSave = findViewById(R.id.btnSaveSighting);
 
-        if (getIntent().hasExtra(EXTRA_LAT) && getIntent().hasExtra(EXTRA_LNG)) {
-            double lat = getIntent().getDoubleExtra(EXTRA_LAT, 0.0);
-            double lng = getIntent().getDoubleExtra(EXTRA_LNG, 0.0);
-            etLatitude.setText(String.valueOf(lat));
-            etLongitude.setText(String.valueOf(lng));
-        }
+        lat = getIntent().getDoubleExtra("lat", 0.0);
+        lng = getIntent().getDoubleExtra("lng", 0.0);
 
         btnSave.setOnClickListener(v -> saveSighting());
+        
+        findViewById(R.id.btnCapturePhoto).setOnClickListener(v -> Toast.makeText(this, "Photo capture not implemented", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.btnRecordVideo).setOnClickListener(v -> Toast.makeText(this, "Video record not implemented", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.btnRecordAudio).setOnClickListener(v -> Toast.makeText(this, "Audio record not implemented", Toast.LENGTH_SHORT).show());
     }
 
     private void saveSighting() {
         String title = valueOf(etTitle);
-        String latText = valueOf(etLatitude);
-        String lngText = valueOf(etLongitude);
         String notes = valueOf(etNotes);
+        String radiusText = valueOf(etRadius);
 
-        if (TextUtils.isEmpty(title) || TextUtils.isEmpty(latText) || TextUtils.isEmpty(lngText)) {
-            Toast.makeText(this, "Title, latitude, and longitude are required", Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(title) && TextUtils.isEmpty(notes)) {
+            Toast.makeText(this, "Please provide at least a title or description", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        double lat;
-        double lng;
+        float radius = 0;
         try {
-            lat = Double.parseDouble(latText);
-            lng = Double.parseDouble(lngText);
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "Latitude/longitude must be valid numbers", Toast.LENGTH_SHORT).show();
-            return;
-        }
+            if (!TextUtils.isEmpty(radiusText)) radius = Float.parseFloat(radiusText);
+        } catch (NumberFormatException ignored) {}
 
         String authorId = SightingSyncManager.resolveAuthorId();
         String authorName = SightingSyncManager.resolveAuthorName();
+        
         SightingRecord record = SightingStore.createSighting(
-                this,
-                title,
-                notes,
-                lat,
-                lng,
-                System.currentTimeMillis(),
-                authorId,
-                authorName
+                this, title, notes, lat, lng, System.currentTimeMillis(),
+                authorId, authorName, null, null, null, radius
         );
 
-        if (SightingSyncManager.isOnline(this)) {
+        if (appSettingsManager.isAutoSyncEnabled() && SightingSyncManager.isOnline(this)) {
             SightingSyncManager.syncSighting(this, record);
         }
 
-        Intent result = new Intent();
-        result.putExtra(EXTRA_SIGHTING_ID, record.localId);
-        setResult(RESULT_OK, result);
-        Toast.makeText(this, "Sighting saved locally", Toast.LENGTH_SHORT).show();
+        setResult(RESULT_OK);
         finish();
-    }
-
-    private String valueOf(TextInputEditText input) {
-        return input.getText() == null ? "" : input.getText().toString().trim();
     }
 }

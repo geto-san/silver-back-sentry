@@ -37,4 +37,15 @@
     <string name="system_default">System default</string>
     <string name="allowed_by_system_version">Allowed by system version</string>
     <string name="patrol_logs">PATROL LOGS</string>
+    <string name="not_synced">Not synced</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="confirm_delete_account">Are you sure you want to delete your account? This action cannot be undone.</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="account_settings">Account Settings</string>
+    <string name="health_observations">HEALTH OBSERVATIONS</string>
+    <string name="record_new_sighting">Record new sighting</string>
+    <string name="record_new_health_observation">Record new Health observation</string>
+    <string name="record_patrol_logs">Record Patrol Logs</string>
 </resources>

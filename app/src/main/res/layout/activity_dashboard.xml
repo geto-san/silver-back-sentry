@@ -187,45 +187,6 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="24dp">
 
-                <!-- HOME -->
-                <LinearLayout
-                    android:id="@+id/menuHome"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="60dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp">
-
-                    <FrameLayout
-                        android:layout_width="32dp"
-                        android:layout_height="32dp">
-
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:layout_gravity="center"
-                            android:alpha="0.92"
-                            android:src="@android:drawable/ic_menu_gallery"
-                            app:tint="?attr/menuIconTint" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.06"
-                        android:text="HOME"
-                        android:textColor="?attr/menuTextColor"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
                 <!-- SIGHTINGS -->
                 <LinearLayout
                     android:id="@+id/menuNewSighting"
@@ -265,9 +226,9 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- PATROL OBSERVATION LOG-->
+                <!-- PATROL LOGS -->
                 <LinearLayout
-                    android:id="@+id/menuHealthObservation"
+                    android:id="@+id/menuPatrolLogs"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="60dp"
@@ -299,84 +260,6 @@
                         android:includeFontPadding="false"
                         android:letterSpacing="0.06"
                         android:text="@string/patrol_logs"
-                        android:textColor="?attr/menuTextColor"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- MAP -->
-                <LinearLayout
-                    android:id="@+id/menuMap"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="60dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp">
-
-                    <FrameLayout
-                        android:layout_width="32dp"
-                        android:layout_height="32dp">
-
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:layout_gravity="center"
-                            android:alpha="0.92"
-                            android:src="@android:drawable/ic_menu_mylocation"
-                            app:tint="?attr/menuIconTint" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.06"
-                        android:text="MAP"
-                        android:textColor="?attr/menuTextColor"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- SYNC STATUS -->
-                <LinearLayout
-                    android:id="@+id/menuSyncStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="60dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp">
-
-                    <FrameLayout
-                        android:layout_width="32dp"
-                        android:layout_height="32dp">
-
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:layout_gravity="center"
-                            android:alpha="0.92"
-                            android:src="@android:drawable/stat_notify_sync"
-                            app:tint="?attr/menuIconTint" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.06"
-                        android:text="SYNC STATUS"
                         android:textColor="?attr/menuTextColor"
                         android:textSize="16sp"
                         android:textStyle="bold" />

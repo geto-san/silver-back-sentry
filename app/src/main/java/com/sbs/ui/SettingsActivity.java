@@ -1,28 +1,31 @@
 package com.sbs.ui;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
-import android.os.Build;
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.sbs.R;
 import com.sbs.data.AppSettingsManager;
+import com.sbs.data.SightingSyncManager;
 
 public class SettingsActivity extends BaseActivity {
 
     private AutoCompleteTextView actThemeMode;
-    private AutoCompleteTextView actSyncInterval;
     private SwitchMaterial switchAutoSync;
     private SwitchMaterial switchWifiOnlySync;
     private SwitchMaterial switchAutoCenterMap;
     private SwitchMaterial switchShowSampleMarkers;
+    private Button btnSyncNowGlobal;
     private AppSettingsManager appSettingsManager;
 
     @Override
@@ -36,20 +39,28 @@ public class SettingsActivity extends BaseActivity {
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         actThemeMode = findViewById(R.id.actThemeMode);
-        actSyncInterval = findViewById(R.id.actSyncInterval);
         switchAutoSync = findViewById(R.id.switchAutoSync);
         switchWifiOnlySync = findViewById(R.id.switchWifiOnlySync);
         switchAutoCenterMap = findViewById(R.id.switchAutoCenterMap);
         switchShowSampleMarkers = findViewById(R.id.switchShowSampleMarkers);
-
-        toolbar.setNavigationOnClickListener(v -> finish());
+        btnSyncNowGlobal = findViewById(R.id.btnSyncNowGlobal);
 
         setupThemeDropdown();
-        setupSyncIntervalDropdown();
         bindSavedValues();
         bindSettingListeners();
+        
+        findViewById(R.id.btnDeleteAccount).setOnClickListener(v -> showDeleteAccountConfirmation());
+        btnSyncNowGlobal.setOnClickListener(v -> {
+            if (SightingSyncManager.isOnline(this)) {
+                SightingSyncManager.syncAllPending(this);
+                Toast.makeText(this, "Syncing all records...", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupThemeDropdown() {
@@ -57,18 +68,6 @@ public class SettingsActivity extends BaseActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, themeOptions);
         actThemeMode.setAdapter(adapter);
-    }
-
-    private void setupSyncIntervalDropdown() {
-        String[] syncOptions = {
-                AppSettingsManager.SYNC_INTERVAL_15,
-                AppSettingsManager.SYNC_INTERVAL_30,
-                AppSettingsManager.SYNC_INTERVAL_60,
-                AppSettingsManager.SYNC_INTERVAL_MANUAL
-        };
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, syncOptions);
-        actSyncInterval.setAdapter(adapter);
     }
 
     private void bindSavedValues() {
@@ -89,31 +88,21 @@ public class SettingsActivity extends BaseActivity {
                 actThemeMode.setText(getString(R.string.system_default), false);
                 break;
         }
-
-        actSyncInterval.setText(appSettingsManager.getSyncInterval(), false);
-        bindSyncControlState();
+        updateSyncUI();
     }
 
     private void bindSettingListeners() {
         actThemeMode.setOnItemClickListener((parent, view, position, id) -> {
-            String selected = actThemeMode.getText() == null ? "" : actThemeMode.getText().toString();
-            if ("Light".equals(selected)) {
-                appSettingsManager.setThemeMode(AppSettingsManager.THEME_LIGHT);
-            } else if ("Dark".equals(selected)) {
-                appSettingsManager.setThemeMode(AppSettingsManager.THEME_DARK);
-            } else {
-                appSettingsManager.setThemeMode(AppSettingsManager.THEME_SYSTEM);
-            }
-
+            String selected = actThemeMode.getText().toString();
+            if ("Light".equals(selected)) appSettingsManager.setThemeMode(AppSettingsManager.THEME_LIGHT);
+            else if ("Dark".equals(selected)) appSettingsManager.setThemeMode(AppSettingsManager.THEME_DARK);
+            else appSettingsManager.setThemeMode(AppSettingsManager.THEME_SYSTEM);
             appSettingsManager.applyTheme();
         });
 
-        actSyncInterval.setOnItemClickListener((parent, view, position, id) ->
-                appSettingsManager.setSyncInterval(actSyncInterval.getText().toString()));
-
         switchAutoSync.setOnCheckedChangeListener((buttonView, isChecked) -> {
             appSettingsManager.setAutoSyncEnabled(isChecked);
-            bindSyncControlState();
+            updateSyncUI();
         });
 
         switchWifiOnlySync.setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -126,24 +115,36 @@ public class SettingsActivity extends BaseActivity {
                 appSettingsManager.setShowSampleMarkersEnabled(isChecked));
     }
 
-    private void bindSyncControlState() {
-        boolean autoSyncEnabled = switchAutoSync.isChecked();
-        switchWifiOnlySync.setEnabled(autoSyncEnabled);
-        actSyncInterval.setEnabled(autoSyncEnabled);
-        actSyncInterval.setAlpha(autoSyncEnabled ? 1f : 0.5f);
-        switchWifiOnlySync.setAlpha(autoSyncEnabled ? 1f : 0.5f);
+    private void updateSyncUI() {
+        boolean autoSync = switchAutoSync.isChecked();
+        btnSyncNowGlobal.setVisibility(autoSync ? View.GONE : View.VISIBLE);
+        switchWifiOnlySync.setEnabled(autoSync);
+        switchWifiOnlySync.setAlpha(autoSync ? 1f : 0.5f);
     }
 
-    private void openAppSettings() {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.fromParts("package", getPackageName(), null));
-        startActivity(intent);
+    private void showDeleteAccountConfirmation() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.delete_account)
+                .setMessage(R.string.confirm_delete_account)
+                .setPositiveButton(R.string.delete, (dialog, which) -> deleteAccount())
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void openNotificationSettings() {
-        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
-        intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-        startActivity(intent);
+    private void deleteAccount() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            user.delete().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(this, "Account deleted", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(this, "Failed to delete account. Please re-authenticate.", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 }

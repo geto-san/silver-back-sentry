@@ -94,27 +94,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="Enable auto sync" />
+                        android:text="Enable automatic sync" />
+
+                    <Button
+                        android:id="@+id/btnSyncNowGlobal"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Sync Now (Bulk)"
+                        android:visibility="gone" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchWifiOnlySync"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Sync only on Wi-Fi" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:hint="Sync interval"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/actSyncInterval"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none" />
-                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -154,6 +149,42 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Show sample markers on map" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Account Settings -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="?attr/surfaceBackground"
+                app:cardCornerRadius="18dp"
+                app:strokeColor="?attr/dividerColor"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/account_settings"
+                        android:textColor="?attr/primaryTextColor"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btnDeleteAccount"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/delete_account"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:gravity="start|center_vertical" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

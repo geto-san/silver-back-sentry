@@ -47,7 +47,7 @@ public class SyncStatusActivity extends AppCompatActivity {
 
     private void refreshStatus() {
         tvPendingTotal.setText(String.valueOf(FieldDataStore.getPendingItemCount(this)));
-        tvSightingsCount.setText(String.valueOf(SightingStore.getTotalCount(this)));
+        tvSightingsCount.setText(String.valueOf(SightingStore.getAll(this).size()));
         tvHealthCount.setText(String.valueOf(FieldDataStore.getHealthObservationCount(this)));
         tvLastSync.setText(FieldDataStore.getLastSync(this));
         tvNetworkStatus.setText(isOnline() ? "Online" : "Offline");

@@ -20,7 +20,7 @@ public final class SightingStore {
     public static final String STATUS_FAILED = "FAILED";
 
     private static final String PREFS = "sbs_sightings";
-    private static final String KEY_SIGHTINGS = "sightings_v2";
+    private static final String KEY_SIGHTINGS = "sightings_v3";
 
     private SightingStore() {}
 
@@ -32,7 +32,11 @@ public final class SightingStore {
             double lng,
             long timestamp,
             String authorId,
-            String authorName
+            String authorName,
+            String audioPath,
+            String imagePath,
+            String videoPath,
+            float radius
     ) {
         String localId = UUID.randomUUID().toString();
         SightingRecord record = new SightingRecord(
@@ -46,7 +50,11 @@ public final class SightingStore {
                 authorId,
                 authorName,
                 STATUS_PENDING,
-                0L
+                0L,
+                audioPath,
+                imagePath,
+                videoPath,
+                radius
         );
         appendRecord(context, record);
         return record;
@@ -77,10 +85,6 @@ public final class SightingStore {
             }
         }
         return records;
-    }
-
-    public static int getTotalCount(Context context) {
-        return readAll(context).size();
     }
 
     public static int getPendingCount(Context context) {
@@ -163,16 +167,19 @@ public final class SightingStore {
             obj.put("authorName", record.authorName);
             obj.put("syncStatus", record.syncStatus);
             obj.put("lastSyncAttempt", record.lastSyncAttempt);
+            obj.put("audioPath", record.audioPath);
+            obj.put("imagePath", record.imagePath);
+            obj.put("videoPath", record.videoPath);
+            obj.put("radius", record.radius);
         } catch (JSONException ignored) {
         }
         return obj;
     }
 
     private static SightingRecord fromJson(JSONObject obj) {
-        String firestoreId = obj.isNull("firestoreId") ? null : obj.optString("firestoreId", null);
         return new SightingRecord(
                 obj.optString("localId"),
-                firestoreId,
+                obj.isNull("firestoreId") ? null : obj.optString("firestoreId"),
                 obj.optString("title"),
                 obj.optString("notes"),
                 obj.optDouble("lat"),
@@ -181,7 +188,11 @@ public final class SightingStore {
                 obj.optString("authorId", null),
                 obj.optString("authorName", null),
                 obj.optString("syncStatus", STATUS_PENDING),
-                obj.optLong("lastSyncAttempt", 0L)
+                obj.optLong("lastSyncAttempt", 0L),
+                obj.optString("audioPath", null),
+                obj.optString("imagePath", null),
+                obj.optString("videoPath", null),
+                (float) obj.optDouble("radius", 0.0)
         );
     }
 }

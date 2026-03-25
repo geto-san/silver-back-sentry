@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/screenBackground">
@@ -11,29 +10,21 @@
         android:layout_height="wrap_content"
         android:background="?attr/toolbarBackground">
 
-        <TextView
-            android:id="@+id/tvNetworkStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="4dp"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:visibility="gone" />
-
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="Device Diagnostics"
             app:titleTextColor="?attr/primaryTextColor"
-            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:navigationIcon="@android:drawable/ic_menu_revert"
             app:navigationIconTint="?attr/iconTintColor" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -48,8 +39,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="?attr/surfaceBackground"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
                 app:strokeColor="?attr/dividerColor"
                 app:strokeWidth="1dp">
 
@@ -57,21 +48,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Device Overview"
                         android:textColor="?attr/primaryTextColor"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="8dp"
-                        android:background="?attr/dividerColor" />
+                        android:layout_width="40dp"
+                        android:layout_height="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="?attr/colorSecondary" />
 
                     <include layout="@layout/row_diagnostic" android:id="@+id/rowBrand" />
                     <include layout="@layout/row_diagnostic" android:id="@+id/rowManufacturer" />
@@ -90,8 +82,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="?attr/surfaceBackground"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
                 app:strokeColor="?attr/dividerColor"
                 app:strokeWidth="1dp">
 
@@ -99,21 +91,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="CPU Diagnostics"
                         android:textColor="?attr/primaryTextColor"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="8dp"
-                        android:background="?attr/dividerColor" />
+                        android:layout_width="40dp"
+                        android:layout_height="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="?attr/colorSecondary" />
 
                     <include layout="@layout/row_diagnostic" android:id="@+id/rowCpuAbi" />
                     <include layout="@layout/row_diagnostic" android:id="@+id/rowCores" />
@@ -129,8 +122,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="?attr/surfaceBackground"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
                 app:strokeColor="?attr/dividerColor"
                 app:strokeWidth="1dp">
 
@@ -138,21 +131,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="RAM Diagnostics"
                         android:textColor="?attr/primaryTextColor"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="8dp"
-                        android:background="?attr/dividerColor" />
+                        android:layout_width="40dp"
+                        android:layout_height="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="?attr/colorSecondary" />
 
                     <include layout="@layout/row_diagnostic" android:id="@+id/rowTotalRam" />
                     <include layout="@layout/row_diagnostic" android:id="@+id/rowAvailableRam" />
@@ -167,8 +161,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="?attr/surfaceBackground"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
                 app:strokeColor="?attr/dividerColor"
                 app:strokeWidth="1dp">
 
@@ -176,21 +170,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Sensor Diagnostics"
                         android:textColor="?attr/primaryTextColor"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="8dp"
-                        android:background="?attr/dividerColor" />
+                        android:layout_width="40dp"
+                        android:layout_height="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="?attr/colorSecondary" />
 
                     <LinearLayout
                         android:id="@+id/sensorContainer"
@@ -208,8 +203,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="?attr/surfaceBackground"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
                 app:strokeColor="?attr/dividerColor"
                 app:strokeWidth="1dp">
 
@@ -217,21 +212,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Live Sensor Data"
                         android:textColor="?attr/primaryTextColor"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="8dp"
-                        android:background="?attr/dividerColor" />
+                        android:layout_width="40dp"
+                        android:layout_height="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="?attr/colorSecondary" />
 
                     <include layout="@layout/row_diagnostic" android:id="@+id/rowLiveAccel" />
                     <include layout="@layout/row_diagnostic" android:id="@+id/rowLiveGyro" />
