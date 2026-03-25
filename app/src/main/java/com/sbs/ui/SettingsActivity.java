@@ -1,29 +1,21 @@
 package com.sbs.ui;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.TextView;
 
-import androidx.core.content.ContextCompat;
+import androidx.annotation.RequiresApi;
+import android.os.Build;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.sbs.R;
 import com.sbs.data.AppSettingsManager;
 
 public class SettingsActivity extends BaseActivity {
-
-    private TextView tvThemeMode;
-    private TextView tvNotificationStatus;
-    private TextView tvLocationStatus;
 
     private AutoCompleteTextView actThemeMode;
     private AutoCompleteTextView actSyncInterval;
@@ -31,7 +23,6 @@ public class SettingsActivity extends BaseActivity {
     private SwitchMaterial switchWifiOnlySync;
     private SwitchMaterial switchAutoCenterMap;
     private SwitchMaterial switchShowSampleMarkers;
-
     private AppSettingsManager appSettingsManager;
 
     @Override
@@ -45,13 +36,6 @@ public class SettingsActivity extends BaseActivity {
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        MaterialButton btnAppSettings = findViewById(R.id.btnAppSettings);
-        MaterialButton btnNotificationSettings = findViewById(R.id.btnNotificationSettings);
-        MaterialButton btnLocationSettings = findViewById(R.id.btnLocationSettings);
-
-        tvThemeMode = findViewById(R.id.tvThemeMode);
-        tvNotificationStatus = findViewById(R.id.tvNotificationStatus);
-        tvLocationStatus = findViewById(R.id.tvLocationStatus);
 
         actThemeMode = findViewById(R.id.actThemeMode);
         actSyncInterval = findViewById(R.id.actSyncInterval);
@@ -66,17 +50,6 @@ public class SettingsActivity extends BaseActivity {
         setupSyncIntervalDropdown();
         bindSavedValues();
         bindSettingListeners();
-
-        btnAppSettings.setOnClickListener(v -> openAppSettings());
-        btnNotificationSettings.setOnClickListener(v -> openNotificationSettings());
-        btnLocationSettings.setOnClickListener(v ->
-                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        bindSystemStatus();
     }
 
     private void setupThemeDropdown() {
@@ -107,13 +80,13 @@ public class SettingsActivity extends BaseActivity {
         String themeMode = appSettingsManager.getThemeMode();
         switch (themeMode) {
             case AppSettingsManager.THEME_LIGHT:
-                actThemeMode.setText("Light", false);
+                actThemeMode.setText(getString(R.string.light), false);
                 break;
             case AppSettingsManager.THEME_DARK:
-                actThemeMode.setText("Dark", false);
+                actThemeMode.setText(getString(R.string.dark), false);
                 break;
             default:
-                actThemeMode.setText("System default", false);
+                actThemeMode.setText(getString(R.string.system_default), false);
                 break;
         }
 
@@ -161,36 +134,13 @@ public class SettingsActivity extends BaseActivity {
         switchWifiOnlySync.setAlpha(autoSyncEnabled ? 1f : 0.5f);
     }
 
-    private void bindSystemStatus() {
-        int nightMode = getResources().getConfiguration().uiMode
-                & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-        tvThemeMode.setText(nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-                ? "Dark"
-                : "Light");
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            boolean granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    == PackageManager.PERMISSION_GRANTED;
-            tvNotificationStatus.setText(granted ? "Allowed" : "Blocked");
-        } else {
-            tvNotificationStatus.setText("Allowed by system version");
-        }
-
-        boolean locationGranted =
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED
-                        || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED;
-
-        tvLocationStatus.setText(locationGranted ? "Allowed" : "Not granted");
-    }
-
     private void openAppSettings() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.fromParts("package", getPackageName(), null));
         startActivity(intent);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void openNotificationSettings() {
         Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());

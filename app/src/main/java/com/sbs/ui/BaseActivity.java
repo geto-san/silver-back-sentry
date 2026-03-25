@@ -8,7 +8,6 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -51,16 +50,12 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkS
 
         if (isAirplaneModeOn) {
             tvNetworkStatus.setText(R.string.network_airplane_mode);
-            tvNetworkStatus.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_orange_dark));
             tvNetworkStatus.setVisibility(View.VISIBLE);
         } else if (!isOnline) {
             tvNetworkStatus.setText(R.string.network_offline);
-            tvNetworkStatus.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
             tvNetworkStatus.setVisibility(View.VISIBLE);
         } else {
-            tvNetworkStatus.setText(R.string.network_online);
-            tvNetworkStatus.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_dark));
-            tvNetworkStatus.setVisibility(View.VISIBLE);
+            tvNetworkStatus.setVisibility(View.GONE);
         }
     }
 
