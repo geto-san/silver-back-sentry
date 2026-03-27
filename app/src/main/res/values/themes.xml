@@ -48,6 +48,8 @@
         <item name="menuDividerColor">@color/sbs_divider</item>
     </style>
 
+    <style name="Theme.Sbs.Splash" parent="Theme.Sbs" />
+
     <style name="InstagramEditText" parent="Widget.AppCompat.EditText">
         <item name="android:background">@drawable/bg_ig_input</item>
         <item name="android:padding">12dp</item>

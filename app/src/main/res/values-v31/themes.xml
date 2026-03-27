@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.Sbs.Splash" parent="Theme.Sbs">
+        <item name="android:windowSplashScreenBackground">@color/sbs_screen</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/gorilla_icon_minimal_flat_splash</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/black</item>
+        <item name="postSplashScreenTheme">@style/Theme.Sbs</item>
+    </style>
+</resources>
