@@ -71,24 +71,53 @@
                     android:textStyle="bold"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/btnNotifications"
+                    app:layout_constraintEnd_toStartOf="@id/btnThemeMode"
                     app:layout_constraintStart_toEndOf="@id/tvDashboardTitle"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <!-- Notifications Button at extreme right edge -->
                 <ImageButton
-                    android:id="@+id/btnNotifications"
+                    android:id="@+id/btnThemeMode"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/appearance"
+                    android:padding="12dp"
+                    android:src="@android:drawable/ic_menu_manage"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/notificationContainer"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?attr/iconTintColor" />
+
+                <FrameLayout
+                    android:id="@+id/notificationContainer"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginEnd="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/profile"
-                    android:padding="12dp"
-                    android:src="@android:drawable/ic_popup_reminder"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:tint="?attr/iconTintColor" />
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageButton
+                        android:id="@+id/btnNotifications"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/notifications"
+                        android:padding="12dp"
+                        android:src="@android:drawable/ic_popup_reminder"
+                        app:tint="?attr/iconTintColor" />
+
+                    <View
+                        android:id="@+id/viewNotificationDot"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/bg_notification_dot"
+                        android:visibility="gone" />
+                </FrameLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.Toolbar>
@@ -304,6 +333,45 @@
 
                 <!-- PATROL LOGS -->
                 <LinearLayout
+                    android:id="@+id/menuHealthObservations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="60dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp">
+
+                    <FrameLayout
+                        android:layout_width="32dp"
+                        android:layout_height="32dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:alpha="0.92"
+                            android:src="@android:drawable/ic_menu_info_details"
+                            app:tint="?attr/menuIconTint" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:includeFontPadding="false"
+                        android:letterSpacing="0.06"
+                        android:text="@string/health_observation"
+                        android:textColor="?attr/menuTextColor"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- PATROL LOGS -->
+                <LinearLayout
                     android:id="@+id/menuPatrolLogs"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -375,45 +443,6 @@
                         android:includeFontPadding="false"
                         android:letterSpacing="0.06"
                         android:text="@string/device_info"
-                        android:textColor="?attr/menuTextColor"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- SETTINGS -->
-                <LinearLayout
-                    android:id="@+id/menuSettings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="60dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp">
-
-                    <FrameLayout
-                        android:layout_width="32dp"
-                        android:layout_height="32dp">
-
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:layout_gravity="center"
-                            android:alpha="0.92"
-                            android:src="@android:drawable/ic_menu_preferences"
-                            app:tint="?attr/menuIconTint" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.06"
-                        android:text="@string/settings"
                         android:textColor="?attr/menuTextColor"
                         android:textSize="16sp"
                         android:textStyle="bold" />

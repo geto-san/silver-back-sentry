@@ -16,7 +16,6 @@ import androidx.core.content.ContextCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.sbs.R;
-import com.sbs.ui.DashboardActivity;
 
 public class SbsFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -37,6 +36,7 @@ public class SbsFirebaseMessagingService extends FirebaseMessagingService {
         String title = "Silver Back Sentry";
         String body = "You have a new alert.";
         String type = "general";
+        String recordId = null;
 
         if (remoteMessage.getNotification() != null) {
             if (remoteMessage.getNotification().getTitle() != null) {
@@ -57,29 +57,19 @@ public class SbsFirebaseMessagingService extends FirebaseMessagingService {
             if (remoteMessage.getData().get("type") != null) {
                 type = remoteMessage.getData().get("type");
             }
+            recordId = remoteMessage.getData().get("recordId");
         }
 
-        createNotificationChannel();
+        AppNotificationHelper.ensureChannel(this);
 
-        Intent intent = buildIntentForType(type);
-        intent.putExtra("alert_type", type);
-        if (remoteMessage.getData().get("entityId") != null) {
-            intent.putExtra("entity_id", remoteMessage.getData().get("entityId"));
-        }
-        if (remoteMessage.getData().get("authorId") != null) {
-            intent.putExtra("author_id", remoteMessage.getData().get("authorId"));
-        }
+        Intent intent = new Intent(this, com.sbs.ui.DashboardActivity.class);
+        intent.putExtra("record_type", type);
+        intent.putExtra("record_id", recordId);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this,
-                type.hashCode(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, type.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this, CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, AppNotificationHelper.CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle(title)
                         .setContentText(body)
@@ -94,25 +84,5 @@ public class SbsFirebaseMessagingService extends FirebaseMessagingService {
             NotificationManagerCompat.from(this)
                     .notify((int) System.currentTimeMillis(), builder.build());
         }
-    }
-
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "SBS Alerts",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel.setDescription("Notifications for sightings, sync, reminders, and alerts");
-
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-            }
-        }
-    }
-
-    private Intent buildIntentForType(String type) {
-        return new Intent(this, DashboardActivity.class);
     }
 }

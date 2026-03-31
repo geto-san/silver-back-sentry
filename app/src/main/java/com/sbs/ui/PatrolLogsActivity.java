@@ -3,7 +3,6 @@ package com.sbs.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -16,17 +15,14 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.sbs.R;
 import com.sbs.data.AppRepository;
-import com.sbs.data.AppSettingsManager;
 import com.sbs.data.PatrolLogRecord;
-import com.sbs.data.SightingSyncManager;
 
 public class PatrolLogsActivity extends BaseActivity implements PatrolLogsAdapter.LogActionListener {
 
     private PatrolLogsAdapter adapter;
     private View emptyState;
-    private AppSettingsManager appSettingsManager;
     private AppRepository repository;
-    private String rangerId;
+    private String currentUserId;
 
     private final ActivityResultLauncher<Intent> editorLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -38,10 +34,9 @@ public class PatrolLogsActivity extends BaseActivity implements PatrolLogsAdapte
         setContentView(R.layout.activity_patrol_logs);
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
-        appSettingsManager = new AppSettingsManager(this);
         repository = AppRepository.getInstance(this);
-        rangerId = FirebaseAuth.getInstance().getUid();
-        if (rangerId == null) {
+        currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) {
             finish();
             return;
         }
@@ -51,7 +46,7 @@ public class PatrolLogsActivity extends BaseActivity implements PatrolLogsAdapte
 
         RecyclerView recyclerView = findViewById(R.id.recyclerPatrolLogs);
         emptyState = findViewById(R.id.tvEmptyState);
-        adapter = new PatrolLogsAdapter(appSettingsManager, this);
+        adapter = new PatrolLogsAdapter(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
@@ -61,20 +56,18 @@ public class PatrolLogsActivity extends BaseActivity implements PatrolLogsAdapte
             editorLauncher.launch(intent);
         });
 
-        repository.observePatrolLogs(rangerId).observe(this, records -> {
+        repository.observePatrolLogs().observe(this, records -> {
             adapter.submitList(records);
             emptyState.setVisibility(records == null || records.isEmpty() ? View.VISIBLE : View.GONE);
         });
     }
 
     @Override
-    public void onSyncNow(PatrolLogRecord record) {
-        if (SightingSyncManager.isOnline(this)) {
-            SightingSyncManager.syncAllPending(this);
-            Toast.makeText(this, "Sync queued", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "No connection or WiFi required", Toast.LENGTH_SHORT).show();
-        }
+    public void onOpen(PatrolLogRecord record) {
+        Intent intent = new Intent(this, RecordDetailActivity.class);
+        intent.putExtra("record_id", record.localId);
+        intent.putExtra("record_type", "PATROL_LOG");
+        startActivity(intent);
     }
 
     @Override
@@ -83,8 +76,7 @@ public class PatrolLogsActivity extends BaseActivity implements PatrolLogsAdapte
                 .setTitle("Delete Patrol Log")
                 .setMessage("Are you sure you want to delete this log locally?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    repository.deletePatrolLog(rangerId, record.localId);
-                    Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
+                    repository.deletePatrolLog(record.localId);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

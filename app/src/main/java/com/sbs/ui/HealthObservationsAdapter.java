@@ -13,63 +13,57 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.sbs.R;
-import com.sbs.data.SightingRecord;
+import com.sbs.data.HealthObservationRecord;
 import com.sbs.data.SyncState;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Locale;
 
-public final class SightingsAdapter extends ListAdapter<SightingRecord, SightingsAdapter.SightingViewHolder> {
+public final class HealthObservationsAdapter extends ListAdapter<HealthObservationRecord, HealthObservationsAdapter.HealthViewHolder> {
 
-    public interface SightingActionListener {
-        void onOpen(SightingRecord record);
-        void onDelete(SightingRecord record);
-        void onEdit(SightingRecord record);
+    public interface HealthActionListener {
+        void onOpen(HealthObservationRecord record);
+        void onEdit(HealthObservationRecord record);
+        void onDelete(HealthObservationRecord record);
     }
 
-    private static final DiffUtil.ItemCallback<SightingRecord> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<SightingRecord>() {
+    private static final DiffUtil.ItemCallback<HealthObservationRecord> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<HealthObservationRecord>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull SightingRecord oldItem, @NonNull SightingRecord newItem) {
+                public boolean areItemsTheSame(@NonNull HealthObservationRecord oldItem, @NonNull HealthObservationRecord newItem) {
                     return oldItem.localId.equals(newItem.localId);
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull SightingRecord oldItem, @NonNull SightingRecord newItem) {
+                public boolean areContentsTheSame(@NonNull HealthObservationRecord oldItem, @NonNull HealthObservationRecord newItem) {
                     return oldItem.timestamp == newItem.timestamp
-                            && oldItem.lastSyncAttempt == newItem.lastSyncAttempt
-                            && oldItem.lat == newItem.lat
-                            && oldItem.lng == newItem.lng
-                            && oldItem.radius == newItem.radius
                             && sameText(oldItem.title, newItem.title)
                             && sameText(oldItem.notes, newItem.notes)
                             && sameText(oldItem.syncStatus, newItem.syncStatus);
                 }
             };
 
-    private final SightingActionListener actionListener;
+    private final HealthActionListener actionListener;
 
-    public SightingsAdapter(SightingActionListener actionListener) {
+    public HealthObservationsAdapter(HealthActionListener actionListener) {
         super(DIFF_CALLBACK);
         this.actionListener = actionListener;
     }
 
     @NonNull
     @Override
-    public SightingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new SightingViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_sighting_item, parent, false));
+    public HealthViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new HealthViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_health_observation_item, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SightingViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull HealthViewHolder holder, int position) {
         holder.bind(getItem(position));
     }
 
-    final class SightingViewHolder extends RecyclerView.ViewHolder {
+    final class HealthViewHolder extends RecyclerView.ViewHolder {
         private final TextView title;
         private final TextView author;
-        private final TextView coords;
         private final TextView notes;
         private final TextView timestamp;
         private final TextView status;
@@ -77,27 +71,24 @@ public final class SightingsAdapter extends ListAdapter<SightingRecord, Sighting
         private final Button edit;
         private final Button delete;
 
-        SightingViewHolder(@NonNull View itemView) {
+        HealthViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.tvSightingTitle);
-            author = itemView.findViewById(R.id.tvSightingAuthor);
-            coords = itemView.findViewById(R.id.tvSightingCoords);
-            notes = itemView.findViewById(R.id.tvSightingNotes);
-            timestamp = itemView.findViewById(R.id.tvSightingTimestamp);
-            status = itemView.findViewById(R.id.tvSightingStatus);
-            actions = itemView.findViewById(R.id.layoutActions);
-            edit = itemView.findViewById(R.id.btnEdit);
-            delete = itemView.findViewById(R.id.btnDelete);
+            title = itemView.findViewById(R.id.tvHealthTitle);
+            author = itemView.findViewById(R.id.tvHealthAuthor);
+            notes = itemView.findViewById(R.id.tvHealthNotes);
+            timestamp = itemView.findViewById(R.id.tvHealthTimestamp);
+            status = itemView.findViewById(R.id.tvHealthStatus);
+            actions = itemView.findViewById(R.id.layoutHealthActions);
+            edit = itemView.findViewById(R.id.btnHealthEdit);
+            delete = itemView.findViewById(R.id.btnHealthDelete);
         }
 
-        void bind(SightingRecord record) {
+        void bind(HealthObservationRecord record) {
             title.setText(record.title);
             author.setText("By: " + (record.authorName == null ? "Unknown" : record.authorName));
-            coords.setText(String.format(Locale.US, "Lat %.5f, Lng %.5f", record.lat, record.lng));
             notes.setText(record.notes == null || record.notes.isEmpty() ? itemView.getContext().getString(R.string.no_notes) : record.notes);
             timestamp.setText(DateFormat.getDateTimeInstance().format(new Date(record.timestamp)));
             status.setText(formatStatus(record.syncStatus));
-
             itemView.setOnClickListener(v -> actionListener.onOpen(record));
 
             boolean canEdit = record.authorId != null && record.authorId.equals(FirebaseAuth.getInstance().getUid());

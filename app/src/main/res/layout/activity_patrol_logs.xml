@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:text="No patrol logs yet."
+            android:text="@string/no_patrol_logs_yet"
             android:textColor="?attr/secondaryTextColor"
             android:textSize="14sp"
             android:visibility="gone" />
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="New Patrol Log"
+        android:contentDescription="@string/new_patrol_log"
         android:src="@android:drawable/ic_input_add"
         app:tint="?attr/iconTintColor" />
 

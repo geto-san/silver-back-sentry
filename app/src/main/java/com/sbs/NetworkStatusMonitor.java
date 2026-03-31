@@ -1,4 +1,4 @@
-package com.sbs;
+package com.sbs.util;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -10,9 +10,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.sbs.R;
 import com.sbs.data.AppRepository;
-import com.sbs.data.AppSettingsManager;
 import com.sbs.data.SightingRecord;
-import com.sbs.data.SightingSyncManager;
+import com.sbs.data.SyncScheduler;
 
 public class SightingEditorActivity extends BaseActivity {
 
@@ -23,9 +22,8 @@ public class SightingEditorActivity extends BaseActivity {
     private double lng;
     private String existingSightingId;
     private SightingRecord existingRecord;
-    private AppSettingsManager appSettingsManager;
     private AppRepository repository;
-    private String rangerId;
+    private String authorId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +31,9 @@ public class SightingEditorActivity extends BaseActivity {
         setContentView(R.layout.activity_sighting_editor);
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
-        appSettingsManager = new AppSettingsManager(this);
         repository = AppRepository.getInstance(this);
-        rangerId = FirebaseAuth.getInstance().getUid();
-        if (rangerId == null) {
+        authorId = FirebaseAuth.getInstance().getUid();
+        if (authorId == null) {
             finish();
             return;
         }
@@ -51,7 +48,7 @@ public class SightingEditorActivity extends BaseActivity {
 
         existingSightingId = getIntent().getStringExtra("sighting_id");
         if (existingSightingId != null) {
-            repository.loadSighting(rangerId, existingSightingId, record -> {
+            repository.loadSighting(existingSightingId, record -> {
                 existingRecord = record;
                 if (record == null) {
                     return;
@@ -92,7 +89,7 @@ public class SightingEditorActivity extends BaseActivity {
 
         long timestamp = existingRecord != null ? existingRecord.timestamp : System.currentTimeMillis();
         repository.saveSighting(
-                rangerId,
+                authorId,
                 existingRecord != null ? existingRecord.localId : null,
                 title,
                 notes,
@@ -104,9 +101,7 @@ public class SightingEditorActivity extends BaseActivity {
                 existingRecord != null ? existingRecord.imagePath : null,
                 existingRecord != null ? existingRecord.videoPath : null,
                 record -> {
-                    if (appSettingsManager.isAutoSyncEnabled() && SightingSyncManager.isOnline(this)) {
-                        SightingSyncManager.syncAllPending(this);
-                    }
+                    SyncScheduler.enqueueSync(this);
                     setResult(RESULT_OK);
                     finish();
                 }

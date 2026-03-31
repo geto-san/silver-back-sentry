@@ -3,7 +3,6 @@ package com.sbs.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -13,19 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.sbs.R;
 import com.sbs.data.AppRepository;
-import com.sbs.data.AppSettingsManager;
 import com.sbs.data.SightingRecord;
-import com.sbs.data.SightingSyncManager;
 
 public class SightingsActivity extends BaseActivity implements SightingsAdapter.SightingActionListener {
 
     private SightingsAdapter adapter;
     private View emptyState;
-    private AppSettingsManager appSettingsManager;
     private AppRepository repository;
-    private String rangerId;
+    private String currentUserId;
 
     private final ActivityResultLauncher<Intent> editorLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -37,57 +34,36 @@ public class SightingsActivity extends BaseActivity implements SightingsAdapter.
         setContentView(R.layout.activity_sightings);
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
-        appSettingsManager = new AppSettingsManager(this);
         repository = AppRepository.getInstance(this);
-        rangerId = FirebaseAuth.getInstance().getUid();
-        if (rangerId == null) {
+        currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) {
             finish();
             return;
         }
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_refresh) {
-                refreshFromRemote();
-                return true;
-            }
-            return false;
-        });
 
         RecyclerView recyclerView = findViewById(R.id.recyclerSightings);
         emptyState = findViewById(R.id.tvEmptyState);
-        adapter = new SightingsAdapter(appSettingsManager, this);
+        adapter = new SightingsAdapter(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+        FloatingActionButton fab = findViewById(R.id.fabAddSighting);
+        fab.setOnClickListener(v -> editorLauncher.launch(new Intent(this, SightingEditorActivity.class)));
 
-        repository.observeSightings(rangerId).observe(this, records -> {
+        repository.observeSightings().observe(this, records -> {
             adapter.submitList(records);
             emptyState.setVisibility(records == null || records.isEmpty() ? View.VISIBLE : View.GONE);
         });
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (appSettingsManager.isAutoSyncEnabled() && SightingSyncManager.isOnline(this)) {
-            SightingSyncManager.syncAllPending(this);
-        }
-    }
-
-    private void refreshFromRemote() {
-        Toast.makeText(this, "Sync queued", Toast.LENGTH_SHORT).show();
-        SightingSyncManager.syncAllPending(this);
-    }
-
-    @Override
-    public void onSyncNow(SightingRecord record) {
-        if (SightingSyncManager.isOnline(this)) {
-            SightingSyncManager.syncAllPending(this);
-            Toast.makeText(this, "Sync queued", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "No connection or WiFi required", Toast.LENGTH_SHORT).show();
-        }
+    public void onOpen(SightingRecord record) {
+        Intent intent = new Intent(this, RecordDetailActivity.class);
+        intent.putExtra("record_id", record.localId);
+        intent.putExtra("record_type", "SIGHTING");
+        startActivity(intent);
     }
 
     @Override
@@ -96,8 +72,7 @@ public class SightingsActivity extends BaseActivity implements SightingsAdapter.
                 .setTitle("Delete Sighting")
                 .setMessage("Are you sure you want to delete this sighting locally?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    repository.deleteSighting(rangerId, record.localId);
-                    Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
+                    repository.deleteSighting(record.localId);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

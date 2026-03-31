@@ -10,9 +10,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.sbs.R;
 import com.sbs.data.AppRepository;
-import com.sbs.data.AppSettingsManager;
 import com.sbs.data.PatrolLogRecord;
-import com.sbs.data.SightingSyncManager;
+import com.sbs.data.SyncScheduler;
 
 public class PatrolLogEditorActivity extends BaseActivity {
 
@@ -20,9 +19,8 @@ public class PatrolLogEditorActivity extends BaseActivity {
     private TextInputEditText etNotes;
     private String existingLogId;
     private PatrolLogRecord existingRecord;
-    private AppSettingsManager appSettingsManager;
     private AppRepository repository;
-    private String rangerId;
+    private String authorId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +28,9 @@ public class PatrolLogEditorActivity extends BaseActivity {
         setContentView(R.layout.activity_patrol_log_editor);
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
-        appSettingsManager = new AppSettingsManager(this);
         repository = AppRepository.getInstance(this);
-        rangerId = FirebaseAuth.getInstance().getUid();
-        if (rangerId == null) {
+        authorId = FirebaseAuth.getInstance().getUid();
+        if (authorId == null) {
             finish();
             return;
         }
@@ -47,7 +44,7 @@ public class PatrolLogEditorActivity extends BaseActivity {
 
         existingLogId = getIntent().getStringExtra("log_id");
         if (existingLogId != null) {
-            repository.loadPatrolLog(rangerId, existingLogId, record -> {
+            repository.loadPatrolLog(existingLogId, record -> {
                 existingRecord = record;
                 if (record == null) {
                     return;
@@ -75,7 +72,7 @@ public class PatrolLogEditorActivity extends BaseActivity {
 
         long timestamp = existingRecord != null ? existingRecord.timestamp : System.currentTimeMillis();
         repository.savePatrolLog(
-                rangerId,
+                authorId,
                 existingRecord != null ? existingRecord.localId : null,
                 title,
                 notes,
@@ -83,9 +80,7 @@ public class PatrolLogEditorActivity extends BaseActivity {
                 existingRecord != null ? existingRecord.audioPath : null,
                 existingRecord != null ? existingRecord.videoPath : null,
                 record -> {
-                    if (appSettingsManager.isAutoSyncEnabled() && SightingSyncManager.isOnline(this)) {
-                        SightingSyncManager.syncAllPending(this);
-                    }
+                    SyncScheduler.enqueueSync(this);
                     setResult(RESULT_OK);
                     finish();
                 }
