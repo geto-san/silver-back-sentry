@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.sbs.R;
-import com.sbs.data.AppSettingsManager;
 import com.sbs.data.SightingRecord;
 import com.sbs.data.SyncState;
 
@@ -21,7 +20,13 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class SightingsAdapter extends ListAdapter<SightingRecord, SightingsAdapter.SightingViewHolder> {
+public final class SightingsAdapter extends ListAdapter<SightingRecord, SightingsAdapter.SightingViewHolder> {
+
+    public interface SightingActionListener {
+        void onOpen(SightingRecord record);
+        void onDelete(SightingRecord record);
+        void onEdit(SightingRecord record);
+    }
 
     private static final DiffUtil.ItemCallback<SightingRecord> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<SightingRecord>() {
@@ -37,32 +42,23 @@ public class SightingsAdapter extends ListAdapter<SightingRecord, SightingsAdapt
                             && oldItem.lat == newItem.lat
                             && oldItem.lng == newItem.lng
                             && oldItem.radius == newItem.radius
-                            && safeEquals(oldItem.title, newItem.title)
-                            && safeEquals(oldItem.notes, newItem.notes)
-                            && safeEquals(oldItem.syncStatus, newItem.syncStatus);
+                            && sameText(oldItem.title, newItem.title)
+                            && sameText(oldItem.notes, newItem.notes)
+                            && sameText(oldItem.syncStatus, newItem.syncStatus);
                 }
             };
 
-    private final AppSettingsManager appSettingsManager;
     private final SightingActionListener actionListener;
 
-    public interface SightingActionListener {
-        void onSyncNow(SightingRecord record);
-        void onDelete(SightingRecord record);
-        void onEdit(SightingRecord record);
-    }
-
-    public SightingsAdapter(AppSettingsManager appSettingsManager, SightingActionListener actionListener) {
+    public SightingsAdapter(SightingActionListener actionListener) {
         super(DIFF_CALLBACK);
-        this.appSettingsManager = appSettingsManager;
         this.actionListener = actionListener;
     }
 
     @NonNull
     @Override
     public SightingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_sighting_item, parent, false);
-        return new SightingViewHolder(view);
+        return new SightingViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_sighting_item, parent, false));
     }
 
     @Override
@@ -70,60 +66,55 @@ public class SightingsAdapter extends ListAdapter<SightingRecord, SightingsAdapt
         holder.bind(getItem(position));
     }
 
-    @Override
-    public int getItemCount() { return getCurrentList().size(); }
-
-    class SightingViewHolder extends RecyclerView.ViewHolder {
-        private final TextView tvTitle, tvAuthor, tvCoords, tvNotes, tvTimestamp, tvStatus;
-        private final View layoutActions;
-        private final Button btnSyncNow, btnDelete, btnEdit;
+    final class SightingViewHolder extends RecyclerView.ViewHolder {
+        private final TextView title;
+        private final TextView author;
+        private final TextView coords;
+        private final TextView notes;
+        private final TextView timestamp;
+        private final TextView status;
+        private final View actions;
+        private final Button edit;
+        private final Button delete;
 
         SightingViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvTitle = itemView.findViewById(R.id.tvSightingTitle);
-            tvAuthor = itemView.findViewById(R.id.tvSightingAuthor);
-            tvCoords = itemView.findViewById(R.id.tvSightingCoords);
-            tvNotes = itemView.findViewById(R.id.tvSightingNotes);
-            tvTimestamp = itemView.findViewById(R.id.tvSightingTimestamp);
-            tvStatus = itemView.findViewById(R.id.tvSightingStatus);
-            layoutActions = itemView.findViewById(R.id.layoutActions);
-            btnSyncNow = itemView.findViewById(R.id.btnSyncNow);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
-            btnEdit = itemView.findViewById(R.id.btnEdit);
+            title = itemView.findViewById(R.id.tvSightingTitle);
+            author = itemView.findViewById(R.id.tvSightingAuthor);
+            coords = itemView.findViewById(R.id.tvSightingCoords);
+            notes = itemView.findViewById(R.id.tvSightingNotes);
+            timestamp = itemView.findViewById(R.id.tvSightingTimestamp);
+            status = itemView.findViewById(R.id.tvSightingStatus);
+            actions = itemView.findViewById(R.id.layoutActions);
+            edit = itemView.findViewById(R.id.btnEdit);
+            delete = itemView.findViewById(R.id.btnDelete);
         }
 
         void bind(SightingRecord record) {
-            tvTitle.setText(record.title);
-            tvAuthor.setText("By: " + (record.authorName != null ? record.authorName : "Unknown"));
-            tvCoords.setText(String.format(Locale.US, "Lat %.5f, Lng %.5f (Radius: %.1fm)", record.lat, record.lng, record.radius));
-            tvNotes.setText(record.notes == null || record.notes.isEmpty() ? "No notes" : record.notes);
-            tvTimestamp.setText(DateFormat.getDateTimeInstance().format(new Date(record.timestamp)));
-            tvStatus.setText(formatStatus(record.syncStatus));
+            title.setText(record.title);
+            author.setText("By: " + (record.authorName == null ? "Unknown" : record.authorName));
+            coords.setText(String.format(Locale.US, "Lat %.5f, Lng %.5f", record.lat, record.lng));
+            notes.setText(record.notes == null || record.notes.isEmpty() ? itemView.getContext().getString(R.string.no_notes) : record.notes);
+            timestamp.setText(DateFormat.getDateTimeInstance().format(new Date(record.timestamp)));
+            status.setText(formatStatus(record.syncStatus));
 
-            String currentUserId = FirebaseAuth.getInstance().getUid();
-            boolean isAuthor = currentUserId != null && currentUserId.equals(record.authorId);
+            itemView.setOnClickListener(v -> actionListener.onOpen(record));
 
-            if (isAuthor) {
-                layoutActions.setVisibility(View.VISIBLE);
-                btnSyncNow.setVisibility(!SyncState.SYNCED.equals(record.syncStatus)
-                        && !appSettingsManager.isAutoSyncEnabled() ? View.VISIBLE : View.GONE);
-                
-                btnSyncNow.setOnClickListener(v -> actionListener.onSyncNow(record));
-                btnDelete.setOnClickListener(v -> actionListener.onDelete(record));
-                btnEdit.setOnClickListener(v -> actionListener.onEdit(record));
-            } else {
-                layoutActions.setVisibility(View.GONE);
-            }
-        }
-
-        private String formatStatus(String status) {
-            if (SyncState.SYNCED.equals(status)) return "Synced";
-            if (SyncState.FAILED.equals(status)) return "Sync Failed";
-            return "Not Synced";
+            boolean canEdit = record.rangerId != null && record.rangerId.equals(FirebaseAuth.getInstance().getUid());
+            actions.setVisibility(canEdit ? View.VISIBLE : View.GONE);
+            edit.setOnClickListener(v -> actionListener.onEdit(record));
+            delete.setOnClickListener(v -> actionListener.onDelete(record));
         }
     }
 
-    private static boolean safeEquals(String left, String right) {
+    private static String formatStatus(String value) {
+        if (SyncState.SYNCED.equals(value)) return "Synced";
+        if (SyncState.SYNCING.equals(value)) return "Syncing";
+        if (SyncState.FAILED.equals(value)) return "Failed";
+        return "Pending";
+    }
+
+    private static boolean sameText(String left, String right) {
         return left == null ? right == null : left.equals(right);
     }
 }

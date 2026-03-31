@@ -12,7 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.sbs.NetworkStatusMonitor;
+import com.sbs.util.NetworkStatusMonitor;
 import com.sbs.R;
 public abstract class BaseActivity extends AppCompatActivity implements NetworkStatusMonitor.NetworkStatusListener {
 

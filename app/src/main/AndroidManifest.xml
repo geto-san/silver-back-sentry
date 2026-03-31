@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name=".SbsApplication"
+        android:name=".app.SbsApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -40,10 +40,19 @@
             android:name=".ui.PatrolLogEditorActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.DeviceInfoActivity"
+            android:name=".ui.HealthObservationsActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.HealthObservationEditorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.NotificationsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.RecordDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.DeviceInfoActivity"
             android:exported="false" />
         <activity
             android:name=".ui.SignUpActivity"

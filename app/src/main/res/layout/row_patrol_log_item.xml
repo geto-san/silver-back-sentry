@@ -78,15 +78,6 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/btnLogSyncNow"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sync_now"
-            android:textSize="12sp"
-            android:visibility="gone" />
-
-        <Button
             android:id="@+id/btnLogDelete"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"

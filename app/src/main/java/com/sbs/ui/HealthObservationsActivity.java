@@ -8,30 +8,28 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.sbs.R;
 import com.sbs.data.AppRepository;
-import com.sbs.data.SightingRecord;
+import com.sbs.data.HealthObservationRecord;
 
-public class SightingsActivity extends BaseActivity implements SightingsAdapter.SightingActionListener {
-
-    private SightingsAdapter adapter;
-    private View emptyState;
-    private AppRepository repository;
-    private String currentUserId;
+public final class HealthObservationsActivity extends BaseActivity implements HealthObservationsAdapter.HealthActionListener {
 
     private final ActivityResultLauncher<Intent> editorLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             });
 
+    private AppRepository repository;
+    private HealthObservationsAdapter adapter;
+    private View emptyState;
+    private String currentUserId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sightings);
+        setContentView(R.layout.activity_health_observations);
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
         repository = AppRepository.getInstance(this);
@@ -44,44 +42,43 @@ public class SightingsActivity extends BaseActivity implements SightingsAdapter.
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerSightings);
         emptyState = findViewById(R.id.tvEmptyState);
-        adapter = new SightingsAdapter(this);
+        adapter = new HealthObservationsAdapter(this);
+        androidx.recyclerview.widget.RecyclerView recyclerView = findViewById(R.id.recyclerHealthObservations);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
-        FloatingActionButton fab = findViewById(R.id.fabAddSighting);
-        fab.setOnClickListener(v -> editorLauncher.launch(new Intent(this, SightingEditorActivity.class)));
 
-        repository.observeSightings(currentUserId).observe(this, records -> {
+        findViewById(R.id.fabAddHealthObservation).setOnClickListener(v ->
+                editorLauncher.launch(new Intent(this, HealthObservationEditorActivity.class)));
+
+        repository.observeHealthObservations(currentUserId).observe(this, records -> {
             adapter.submitList(records);
             emptyState.setVisibility(records == null || records.isEmpty() ? View.VISIBLE : View.GONE);
         });
     }
 
     @Override
-    public void onOpen(SightingRecord record) {
+    public void onOpen(HealthObservationRecord record) {
         Intent intent = new Intent(this, RecordDetailActivity.class);
         intent.putExtra("record_id", record.localId);
-        intent.putExtra("record_type", "SIGHTING");
+        intent.putExtra("record_type", "HEALTH_OBSERVATION");
         startActivity(intent);
     }
 
     @Override
-    public void onDelete(SightingRecord record) {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Sighting")
-                .setMessage("Are you sure you want to delete this sighting locally?")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    repository.deleteSighting(currentUserId, record.localId);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+    public void onEdit(HealthObservationRecord record) {
+        Intent intent = new Intent(this, HealthObservationEditorActivity.class);
+        intent.putExtra("health_id", record.localId);
+        editorLauncher.launch(intent);
     }
 
     @Override
-    public void onEdit(SightingRecord record) {
-        Intent intent = new Intent(this, SightingEditorActivity.class);
-        intent.putExtra("sighting_id", record.localId);
-        editorLauncher.launch(intent);
+    public void onDelete(HealthObservationRecord record) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.delete)
+                .setMessage("Delete this health observation locally?")
+                .setPositiveButton(R.string.delete, (dialog, which) -> repository.deleteHealthObservation(currentUserId, record.localId))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 }

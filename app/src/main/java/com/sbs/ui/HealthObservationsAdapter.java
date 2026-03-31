@@ -13,29 +13,29 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.sbs.R;
-import com.sbs.data.PatrolLogRecord;
+import com.sbs.data.HealthObservationRecord;
 import com.sbs.data.SyncState;
 
 import java.text.DateFormat;
 import java.util.Date;
 
-public final class PatrolLogsAdapter extends ListAdapter<PatrolLogRecord, PatrolLogsAdapter.LogViewHolder> {
+public final class HealthObservationsAdapter extends ListAdapter<HealthObservationRecord, HealthObservationsAdapter.HealthViewHolder> {
 
-    public interface LogActionListener {
-        void onOpen(PatrolLogRecord record);
-        void onDelete(PatrolLogRecord record);
-        void onEdit(PatrolLogRecord record);
+    public interface HealthActionListener {
+        void onOpen(HealthObservationRecord record);
+        void onEdit(HealthObservationRecord record);
+        void onDelete(HealthObservationRecord record);
     }
 
-    private static final DiffUtil.ItemCallback<PatrolLogRecord> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<PatrolLogRecord>() {
+    private static final DiffUtil.ItemCallback<HealthObservationRecord> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<HealthObservationRecord>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull PatrolLogRecord oldItem, @NonNull PatrolLogRecord newItem) {
+                public boolean areItemsTheSame(@NonNull HealthObservationRecord oldItem, @NonNull HealthObservationRecord newItem) {
                     return oldItem.localId.equals(newItem.localId);
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull PatrolLogRecord oldItem, @NonNull PatrolLogRecord newItem) {
+                public boolean areContentsTheSame(@NonNull HealthObservationRecord oldItem, @NonNull HealthObservationRecord newItem) {
                     return oldItem.timestamp == newItem.timestamp
                             && sameText(oldItem.title, newItem.title)
                             && sameText(oldItem.notes, newItem.notes)
@@ -43,25 +43,25 @@ public final class PatrolLogsAdapter extends ListAdapter<PatrolLogRecord, Patrol
                 }
             };
 
-    private final LogActionListener actionListener;
+    private final HealthActionListener actionListener;
 
-    public PatrolLogsAdapter(LogActionListener actionListener) {
+    public HealthObservationsAdapter(HealthActionListener actionListener) {
         super(DIFF_CALLBACK);
         this.actionListener = actionListener;
     }
 
     @NonNull
     @Override
-    public LogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new LogViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_patrol_log_item, parent, false));
+    public HealthViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new HealthViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_health_observation_item, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull LogViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull HealthViewHolder holder, int position) {
         holder.bind(getItem(position));
     }
 
-    final class LogViewHolder extends RecyclerView.ViewHolder {
+    final class HealthViewHolder extends RecyclerView.ViewHolder {
         private final TextView title;
         private final TextView author;
         private final TextView notes;
@@ -71,19 +71,19 @@ public final class PatrolLogsAdapter extends ListAdapter<PatrolLogRecord, Patrol
         private final Button edit;
         private final Button delete;
 
-        LogViewHolder(@NonNull View itemView) {
+        HealthViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.tvLogTitle);
-            author = itemView.findViewById(R.id.tvLogAuthor);
-            notes = itemView.findViewById(R.id.tvLogNotes);
-            timestamp = itemView.findViewById(R.id.tvLogTimestamp);
-            status = itemView.findViewById(R.id.tvLogStatus);
-            actions = itemView.findViewById(R.id.layoutLogActions);
-            edit = itemView.findViewById(R.id.btnLogEdit);
-            delete = itemView.findViewById(R.id.btnLogDelete);
+            title = itemView.findViewById(R.id.tvHealthTitle);
+            author = itemView.findViewById(R.id.tvHealthAuthor);
+            notes = itemView.findViewById(R.id.tvHealthNotes);
+            timestamp = itemView.findViewById(R.id.tvHealthTimestamp);
+            status = itemView.findViewById(R.id.tvHealthStatus);
+            actions = itemView.findViewById(R.id.layoutHealthActions);
+            edit = itemView.findViewById(R.id.btnHealthEdit);
+            delete = itemView.findViewById(R.id.btnHealthDelete);
         }
 
-        void bind(PatrolLogRecord record) {
+        void bind(HealthObservationRecord record) {
             title.setText(record.title);
             author.setText("By: " + (record.authorName == null ? "Unknown" : record.authorName));
             notes.setText(record.notes == null || record.notes.isEmpty() ? itemView.getContext().getString(R.string.no_notes) : record.notes);

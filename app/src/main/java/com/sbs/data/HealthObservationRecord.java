@@ -1,39 +1,41 @@
 package com.sbs.data;
 
-public class PatrolLogRecord {
+public class HealthObservationRecord {
     public final String localId;
-    public final String firestoreId;
+    public final String remoteId;
     public final String title;
     public final String notes;
     public final long timestamp;
     public final String rangerId;
     public final String authorName;
     public final String syncStatus;
-    
-    public final String audioPath;
-    public final String videoPath;
+    public final long lastSyncAttempt;
+    public final double lat;
+    public final double lng;
 
-    public PatrolLogRecord(
+    public HealthObservationRecord(
             String localId,
-            String firestoreId,
+            String remoteId,
             String title,
             String notes,
             long timestamp,
             String rangerId,
             String authorName,
             String syncStatus,
-            String audioPath,
-            String videoPath
+            long lastSyncAttempt,
+            double lat,
+            double lng
     ) {
         this.localId = localId;
-        this.firestoreId = firestoreId;
+        this.remoteId = remoteId;
         this.title = title;
         this.notes = notes;
         this.timestamp = timestamp;
         this.rangerId = rangerId;
         this.authorName = authorName;
         this.syncStatus = syncStatus;
-        this.audioPath = audioPath;
-        this.videoPath = videoPath;
+        this.lastSyncAttempt = lastSyncAttempt;
+        this.lat = lat;
+        this.lng = lng;
     }
 }

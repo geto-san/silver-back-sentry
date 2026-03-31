@@ -8,11 +8,9 @@ import android.net.NetworkRequest;
 
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
-import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.sbs.data.work.FetchRemoteSightingsWorker;
@@ -23,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 public final class SyncScheduler {
 
     private static final String ONE_TIME_SYNC = "one_time_sync";
-    private static final String PERIODIC_SYNC = "periodic_sync";
     private static volatile boolean monitoringStarted;
 
     private SyncScheduler() {
@@ -52,31 +49,7 @@ public final class SyncScheduler {
     }
 
     public static void scheduleConfiguredSync(Context context) {
-        AppSettingsManager settings = new AppSettingsManager(context);
-        if (!settings.isAutoSyncEnabled()) {
-            WorkManager.getInstance(context).cancelUniqueWork(PERIODIC_SYNC);
-            return;
-        }
-
-        long repeatMinutes = settings.getSyncIntervalMinutes();
-        if (repeatMinutes <= 0L) {
-            WorkManager.getInstance(context).cancelUniqueWork(PERIODIC_SYNC);
-            return;
-        }
-
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresBatteryNotLow(true)
-                .build();
-
-        PeriodicWorkRequest periodic = new PeriodicWorkRequest.Builder(
-                UploadPendingDataWorker.class,
-                repeatMinutes,
-                TimeUnit.MINUTES
-        ).setConstraints(constraints).build();
-
-        WorkManager.getInstance(context)
-                .enqueueUniquePeriodicWork(PERIODIC_SYNC, ExistingPeriodicWorkPolicy.UPDATE, periodic);
+        enqueueSync(context);
     }
 
     public static void startConnectivityMonitoring(Context context) {

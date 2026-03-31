@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -27,6 +28,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.sbs.R;
 import com.sbs.data.AppRepository;
 import com.sbs.data.AppSettingsManager;
+import com.sbs.data.RecordType;
+import com.sbs.data.RealtimeSyncManager;
 import com.sbs.data.SightingRecord;
 import com.sbs.databinding.ActivityDashboardBinding;
 import com.sbs.notifications.FcmTokenManager;
@@ -103,6 +106,7 @@ public class DashboardActivity extends BaseActivity {
         FcmTokenManager.syncCurrentToken(this);
         bindCurrentUserFooter();
         repository.upsertCurrentRanger();
+        RealtimeSyncManager.getInstance(this).start();
 
         int originalLeft = binding.sidePanel.getPaddingLeft();
         int originalTop = binding.sidePanel.getPaddingTop();
@@ -128,10 +132,6 @@ public class DashboardActivity extends BaseActivity {
         setupMap();
         setupMyLocationOverlay();
         observeSightings();
-
-        if (appSettingsManager.isShowSampleMarkersEnabled()) {
-            loadSampleSightings();
-        }
 
         restoreDashboardState();
 
@@ -177,18 +177,20 @@ public class DashboardActivity extends BaseActivity {
 
     private void handleIncomingAlert(Intent intent) {
         if (intent == null) return;
-        String alertType = intent.getStringExtra("alert_type");
-        if (alertType == null) return;
-        
-        // Improved type-based deep linking handling
-        if ("sighting".equals(alertType)) {
-            startActivity(new Intent(this, SightingsActivity.class));
-        } else if ("patrol_log".equals(alertType)) {
-            startActivity(new Intent(this, PatrolLogsActivity.class));
-        } else {
-            Toast.makeText(this, "Notification: " + alertType, Toast.LENGTH_SHORT).show();
+        String recordType = intent.getStringExtra("record_type");
+        String recordId = intent.getStringExtra("record_id");
+        String notificationId = intent.getStringExtra("notification_id");
+        if (!TextUtils.isEmpty(notificationId) && FirebaseAuth.getInstance().getUid() != null) {
+            repository.markNotificationRead(FirebaseAuth.getInstance().getUid(), notificationId);
         }
-        intent.removeExtra("alert_type");
+        if (!TextUtils.isEmpty(recordType) && !TextUtils.isEmpty(recordId)) {
+            Intent detailIntent = new Intent(this, RecordDetailActivity.class);
+            detailIntent.putExtra("record_type", recordType);
+            detailIntent.putExtra("record_id", recordId);
+            startActivity(detailIntent);
+            intent.removeExtra("record_type");
+            intent.removeExtra("record_id");
+        }
     }
 
     @Override
@@ -254,9 +256,10 @@ public class DashboardActivity extends BaseActivity {
         marker.setTitle(record.title);
         marker.setSubDescription(record.notes);
         marker.setOnMarkerClickListener((m, mapView) -> {
-            Intent intent = new Intent(this, SightingEditorActivity.class);
-            intent.putExtra("sighting_id", record.localId);
-            recordEditorLauncher.launch(intent);
+            Intent intent = new Intent(this, RecordDetailActivity.class);
+            intent.putExtra("record_id", record.localId);
+            intent.putExtra("record_type", RecordType.SIGHTING);
+            startActivity(intent);
             return true;
         });
         savedSightingMarkers.add(marker);
@@ -298,9 +301,8 @@ public class DashboardActivity extends BaseActivity {
         binding.btnMenuClose.setOnClickListener(v -> hideMenu());
         binding.btnMyLocation.setOnClickListener(v -> toggleActionMenu());
         binding.actionMenuScrim.setOnClickListener(v -> closeActionMenu());
-        binding.btnNotifications.setOnClickListener(v -> {
-            Toast.makeText(this, "No new alerts", Toast.LENGTH_SHORT).show();
-        });
+        binding.btnNotifications.setOnClickListener(v -> startActivity(new Intent(this, NotificationsActivity.class)));
+        binding.btnThemeMode.setOnClickListener(v -> showThemePicker());
 
         View.OnClickListener sightingClick = v -> {
             closeActionMenu();
@@ -308,6 +310,10 @@ public class DashboardActivity extends BaseActivity {
             if (loc != null) openSightingEditor(loc);
         };
         binding.actionSighting.setOnClickListener(sightingClick);
+        binding.menuHealthObservations.setOnClickListener(v -> {
+            hideMenu();
+            startActivity(new Intent(this, HealthObservationsActivity.class));
+        });
         binding.actionCenterMap.setOnClickListener(v -> {
             closeActionMenu();
             centerMapOnUser();
@@ -323,10 +329,6 @@ public class DashboardActivity extends BaseActivity {
         binding.menuDeviceInfo.setOnClickListener(v -> {
             hideMenu();
             startActivity(new Intent(this, DeviceInfoActivity.class));
-        });
-        binding.menuSettings.setOnClickListener(v -> {
-            hideMenu();
-            startActivity(new Intent(this, SettingsActivity.class));
         });
         binding.tvLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
@@ -429,6 +431,8 @@ public class DashboardActivity extends BaseActivity {
             }
             binding.mapView.invalidate();
         });
+        repository.observeUnreadNotificationCount(rangerId).observe(this,
+                count -> binding.viewNotificationDot.setVisibility(count != null && count > 0 ? View.VISIBLE : View.GONE));
     }
 
     private void closeActionMenu() {
@@ -455,4 +459,26 @@ public class DashboardActivity extends BaseActivity {
         }
         return myLoc;
     }
+
+    private void showThemePicker() {
+        String[] choices = {
+                getString(R.string.theme_light),
+                getString(R.string.theme_dark),
+                getString(R.string.theme_system)
+        };
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(R.string.appearance_selector)
+                .setItems(choices, (dialog, which) -> {
+                    if (which == 0) {
+                        appSettingsManager.setThemeMode(AppSettingsManager.THEME_LIGHT);
+                    } else if (which == 1) {
+                        appSettingsManager.setThemeMode(AppSettingsManager.THEME_DARK);
+                    } else {
+                        appSettingsManager.setThemeMode(AppSettingsManager.THEME_SYSTEM);
+                    }
+                    appSettingsManager.applyTheme();
+                })
+                .show();
+    }
+
 }
