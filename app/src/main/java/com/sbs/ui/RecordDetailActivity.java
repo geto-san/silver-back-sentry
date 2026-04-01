@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.sbs.R;
 import com.sbs.data.AppRepository;
 import com.sbs.data.HealthObservationRecord;
@@ -27,18 +28,20 @@ public final class RecordDetailActivity extends BaseActivity {
 
         String recordId = getIntent().getStringExtra("record_id");
         String recordType = getIntent().getStringExtra("record_type");
-        if (recordId == null || recordType == null) {
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+
+        if (recordId == null || recordType == null || currentUserId == null) {
             finish();
             return;
         }
 
         AppRepository repository = AppRepository.getInstance(this);
         if (RecordType.SIGHTING.equals(recordType)) {
-            repository.loadSighting(recordId, this::bindSighting);
+            repository.loadSighting(currentUserId, recordId, this::bindSighting);
         } else if (RecordType.PATROL_LOG.equals(recordType)) {
-            repository.loadPatrolLog(recordId, this::bindPatrolLog);
+            repository.loadPatrolLog(currentUserId, recordId, this::bindPatrolLog);
         } else {
-            repository.loadHealthObservation(recordId, this::bindHealthObservation);
+            repository.loadHealthObservation(currentUserId, recordId, this::bindHealthObservation);
         }
     }
 

@@ -112,7 +112,7 @@ public final class RealtimeSyncManager {
                             healthObservations.add(new HealthObservationEntity(
                                     recordId,
                                     doc.getId(),
-                                    authorId,
+                                    authorId == null ? "" : authorId,
                                     authorDisplayName,
                                     title,
                                     summary,
@@ -162,7 +162,7 @@ public final class RealtimeSyncManager {
                         for (AppNotificationEntity pending : repository.getPendingSystemNotifications(userId)) {
                             AppNotificationHelper.showRecordNotification(appContext, new AppNotificationRecord(
                                     pending.notificationId,
-                                    pending.recipientUserId,
+                                    pending.rangerId,
                                     pending.actorUserId,
                                     pending.actorName,
                                     pending.recordId,

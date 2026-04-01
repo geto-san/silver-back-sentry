@@ -12,17 +12,17 @@ import java.util.List;
 @Dao
 public interface SightingDao {
 
-    @Query("SELECT * FROM sightings ORDER BY timestamp DESC")
-    LiveData<List<SightingEntity>> observeAll();
+    @Query("SELECT * FROM sightings WHERE rangerId = :rangerId ORDER BY timestamp DESC")
+    LiveData<List<SightingEntity>> observeAll(String rangerId);
 
-    @Query("SELECT * FROM sightings ORDER BY timestamp DESC")
-    List<SightingEntity> getAll();
+    @Query("SELECT * FROM sightings WHERE rangerId = :rangerId ORDER BY timestamp DESC")
+    List<SightingEntity> getAll(String rangerId);
 
-    @Query("SELECT * FROM sightings WHERE localId = :localId LIMIT 1")
-    SightingEntity getById(String localId);
+    @Query("SELECT * FROM sightings WHERE rangerId = :rangerId AND localId = :localId LIMIT 1")
+    SightingEntity getById(String rangerId, String localId);
 
-    @Query("SELECT * FROM sightings WHERE syncStatus IN (:statuses) ORDER BY timestamp ASC LIMIT :limit")
-    List<SightingEntity> getPending(String[] statuses, int limit);
+    @Query("SELECT * FROM sightings WHERE rangerId = :rangerId AND syncStatus IN (:statuses) ORDER BY timestamp ASC LIMIT :limit")
+    List<SightingEntity> getPending(String rangerId, String[] statuses, int limit);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void upsert(SightingEntity entity);
@@ -33,6 +33,6 @@ public interface SightingDao {
     @Update
     void update(SightingEntity entity);
 
-    @Query("DELETE FROM sightings WHERE localId = :localId")
-    void delete(String localId);
+    @Query("DELETE FROM sightings WHERE rangerId = :rangerId AND localId = :localId")
+    void delete(String rangerId, String localId);
 }

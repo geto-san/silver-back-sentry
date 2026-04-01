@@ -6,7 +6,7 @@ public class HealthObservationRecord {
     public final String title;
     public final String notes;
     public final long timestamp;
-    public final String authorId;
+    public final String rangerId;
     public final String authorName;
     public final String syncStatus;
     public final long lastSyncAttempt;
@@ -19,7 +19,7 @@ public class HealthObservationRecord {
             String title,
             String notes,
             long timestamp,
-            String authorId,
+            String rangerId,
             String authorName,
             String syncStatus,
             long lastSyncAttempt,
@@ -31,7 +31,7 @@ public class HealthObservationRecord {
         this.title = title;
         this.notes = notes;
         this.timestamp = timestamp;
-        this.authorId = authorId;
+        this.rangerId = rangerId;
         this.authorName = authorName;
         this.syncStatus = syncStatus;
         this.lastSyncAttempt = lastSyncAttempt;

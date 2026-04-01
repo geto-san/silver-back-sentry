@@ -46,7 +46,7 @@ public final class HealthObservationEditorActivity extends BaseActivity {
         lng = getIntent().getDoubleExtra("lng", 0.0);
 
         if (existingId != null) {
-            repository.loadHealthObservation(existingId, record -> {
+            repository.loadHealthObservation(authorId, existingId, record -> {
                 existingRecord = record;
                 if (record != null) {
                     toolbar.setTitle(R.string.edit_health_observation);
@@ -82,5 +82,9 @@ public final class HealthObservationEditorActivity extends BaseActivity {
                     finish();
                 }
         );
+    }
+
+    private String valueOf(TextInputEditText editText) {
+        return editText.getText() != null ? editText.getText().toString().trim() : "";
     }
 }

@@ -2,12 +2,20 @@ package com.sbs.data.local;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 @Entity(
         tableName = "health_observations",
+        foreignKeys = @ForeignKey(
+                entity = RangerEntity.class,
+                parentColumns = "rangerId",
+                childColumns = "rangerId",
+                onDelete = ForeignKey.CASCADE
+        ),
         indices = {
+                @Index("rangerId"),
                 @Index(value = "remoteId", unique = true),
                 @Index("timestamp")
         }
@@ -19,7 +27,10 @@ public class HealthObservationEntity {
     public String localId;
 
     public String remoteId;
-    public String authorId;
+
+    @NonNull
+    public String rangerId;
+
     public String authorName;
     public String title;
     public String notes;
@@ -33,7 +44,7 @@ public class HealthObservationEntity {
     public HealthObservationEntity(
             @NonNull String localId,
             String remoteId,
-            String authorId,
+            @NonNull String rangerId,
             String authorName,
             String title,
             String notes,
@@ -46,7 +57,7 @@ public class HealthObservationEntity {
     ) {
         this.localId = localId;
         this.remoteId = remoteId;
-        this.authorId = authorId;
+        this.rangerId = rangerId;
         this.authorName = authorName;
         this.title = title;
         this.notes = notes;

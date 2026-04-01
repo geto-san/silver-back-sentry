@@ -52,7 +52,7 @@ public class SightingsActivity extends BaseActivity implements SightingsAdapter.
         FloatingActionButton fab = findViewById(R.id.fabAddSighting);
         fab.setOnClickListener(v -> editorLauncher.launch(new Intent(this, SightingEditorActivity.class)));
 
-        repository.observeSightings().observe(this, records -> {
+        repository.observeSightings(currentUserId).observe(this, records -> {
             adapter.submitList(records);
             emptyState.setVisibility(records == null || records.isEmpty() ? View.VISIBLE : View.GONE);
         });
@@ -72,7 +72,7 @@ public class SightingsActivity extends BaseActivity implements SightingsAdapter.
                 .setTitle("Delete Sighting")
                 .setMessage("Are you sure you want to delete this sighting locally?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    repository.deleteSighting(record.localId);
+                    repository.deleteSighting(currentUserId, record.localId);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

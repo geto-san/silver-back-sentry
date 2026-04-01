@@ -421,7 +421,7 @@ public class DashboardActivity extends BaseActivity {
         if (rangerId == null) {
             return;
         }
-        repository.observeSightings().observe(this, records -> {
+        repository.observeSightings(rangerId).observe(this, records -> {
             renderStoredSightings();
             if (records == null) {
                 return;

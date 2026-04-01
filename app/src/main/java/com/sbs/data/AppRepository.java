@@ -17,6 +17,7 @@ import com.sbs.data.local.PatrolLogEntity;
 import com.sbs.data.local.RangerEntity;
 import com.sbs.data.local.SightingEntity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,12 +33,14 @@ public final class AppRepository {
     private static volatile AppRepository instance;
 
     private final AppDatabase database;
+    private final Context context;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private AppRepository(Context context) {
-        database = AppDatabase.getInstance(context);
-        io.execute(() -> LegacyDataImporter.importIfNeeded(context.getApplicationContext(), database));
+        this.context = context.getApplicationContext();
+        database = AppDatabase.getInstance(this.context);
+        io.execute(() -> LegacyDataImporter.importIfNeeded(this.context, database));
     }
 
     public static AppRepository getInstance(Context context) {
@@ -51,44 +54,53 @@ public final class AppRepository {
         return instance;
     }
 
-    public LiveData<List<SightingRecord>> observeSightings() {
+    public File getRangerDir(String rangerId) {
+        File baseDir = context.getFilesDir();
+        File rangerDir = new File(baseDir, "rangers/" + rangerId);
+        if (!rangerDir.exists()) {
+            rangerDir.mkdirs();
+        }
+        return rangerDir;
+    }
+
+    public LiveData<List<SightingRecord>> observeSightings(String rangerId) {
         MediatorLiveData<List<SightingRecord>> liveData = new MediatorLiveData<>();
-        liveData.addSource(database.sightingDao().observeAll(), entities -> liveData.setValue(mapSightings(entities)));
+        liveData.addSource(database.sightingDao().observeAll(rangerId), entities -> liveData.setValue(mapSightings(entities)));
         return liveData;
     }
 
-    public LiveData<List<PatrolLogRecord>> observePatrolLogs() {
+    public LiveData<List<PatrolLogRecord>> observePatrolLogs(String rangerId) {
         MediatorLiveData<List<PatrolLogRecord>> liveData = new MediatorLiveData<>();
-        liveData.addSource(database.patrolLogDao().observeAll(), entities -> liveData.setValue(mapPatrolLogs(entities)));
+        liveData.addSource(database.patrolLogDao().observeAll(rangerId), entities -> liveData.setValue(mapPatrolLogs(entities)));
         return liveData;
     }
 
-    public LiveData<List<HealthObservationRecord>> observeHealthObservations() {
+    public LiveData<List<HealthObservationRecord>> observeHealthObservations(String rangerId) {
         MediatorLiveData<List<HealthObservationRecord>> liveData = new MediatorLiveData<>();
-        liveData.addSource(database.healthObservationDao().observeAll(), entities -> liveData.setValue(mapHealthObservations(entities)));
+        liveData.addSource(database.healthObservationDao().observeAll(rangerId), entities -> liveData.setValue(mapHealthObservations(entities)));
         return liveData;
     }
 
-    public LiveData<List<AppNotificationRecord>> observeNotifications(String recipientUserId) {
+    public LiveData<List<AppNotificationRecord>> observeNotifications(String rangerId) {
         MediatorLiveData<List<AppNotificationRecord>> liveData = new MediatorLiveData<>();
-        liveData.addSource(database.appNotificationDao().observeByRecipient(recipientUserId), entities -> liveData.setValue(mapNotifications(entities)));
+        liveData.addSource(database.appNotificationDao().observeByRanger(rangerId), entities -> liveData.setValue(mapNotifications(entities)));
         return liveData;
     }
 
-    public LiveData<Integer> observeUnreadNotificationCount(String recipientUserId) {
-        return database.appNotificationDao().observeUnreadCount(recipientUserId);
+    public LiveData<Integer> observeUnreadNotificationCount(String rangerId) {
+        return database.appNotificationDao().observeUnreadCount(rangerId);
     }
 
-    public void loadSighting(String localId, RecordCallback<SightingRecord> callback) {
-        io.execute(() -> post(callback, toRecord(database.sightingDao().getById(localId))));
+    public void loadSighting(String rangerId, String localId, RecordCallback<SightingRecord> callback) {
+        io.execute(() -> post(callback, toRecord(database.sightingDao().getById(rangerId, localId))));
     }
 
-    public void loadPatrolLog(String localId, RecordCallback<PatrolLogRecord> callback) {
-        io.execute(() -> post(callback, toRecord(database.patrolLogDao().getById(localId))));
+    public void loadPatrolLog(String rangerId, String localId, RecordCallback<PatrolLogRecord> callback) {
+        io.execute(() -> post(callback, toRecord(database.patrolLogDao().getById(rangerId, localId))));
     }
 
-    public void loadHealthObservation(String localId, RecordCallback<HealthObservationRecord> callback) {
-        io.execute(() -> post(callback, toRecord(database.healthObservationDao().getById(localId))));
+    public void loadHealthObservation(String rangerId, String localId, RecordCallback<HealthObservationRecord> callback) {
+        io.execute(() -> post(callback, toRecord(database.healthObservationDao().getById(rangerId, localId))));
     }
 
     public void saveSighting(
@@ -108,7 +120,7 @@ public final class AppRepository {
         io.execute(() -> {
             long now = System.currentTimeMillis();
             String id = TextUtils.isEmpty(localId) ? UUID.randomUUID().toString() : localId;
-            SightingEntity current = database.sightingDao().getById(id);
+            SightingEntity current = database.sightingDao().getById(authorId, id);
             upsertRanger(resolveCurrentUser());
             SightingEntity entity = new SightingEntity(
                     id,
@@ -146,7 +158,7 @@ public final class AppRepository {
         io.execute(() -> {
             long now = System.currentTimeMillis();
             String id = TextUtils.isEmpty(localId) ? UUID.randomUUID().toString() : localId;
-            PatrolLogEntity current = database.patrolLogDao().getById(id);
+            PatrolLogEntity current = database.patrolLogDao().getById(authorId, id);
             upsertRanger(resolveCurrentUser());
             PatrolLogEntity entity = new PatrolLogEntity(
                     id,
@@ -180,7 +192,7 @@ public final class AppRepository {
         io.execute(() -> {
             long now = System.currentTimeMillis();
             String id = TextUtils.isEmpty(localId) ? UUID.randomUUID().toString() : localId;
-            HealthObservationEntity current = database.healthObservationDao().getById(id);
+            HealthObservationEntity current = database.healthObservationDao().getById(authorId, id);
             upsertRanger(resolveCurrentUser());
             HealthObservationEntity entity = new HealthObservationEntity(
                     id,
@@ -201,16 +213,16 @@ public final class AppRepository {
         });
     }
 
-    public void deleteSighting(String localId) {
-        io.execute(() -> database.sightingDao().delete(localId));
+    public void deleteSighting(String rangerId, String localId) {
+        io.execute(() -> database.sightingDao().delete(rangerId, localId));
     }
 
-    public void deletePatrolLog(String localId) {
-        io.execute(() -> database.patrolLogDao().delete(localId));
+    public void deletePatrolLog(String rangerId, String localId) {
+        io.execute(() -> database.patrolLogDao().delete(rangerId, localId));
     }
 
-    public void deleteHealthObservation(String localId) {
-        io.execute(() -> database.healthObservationDao().delete(localId));
+    public void deleteHealthObservation(String rangerId, String localId) {
+        io.execute(() -> database.healthObservationDao().delete(rangerId, localId));
     }
 
     public void upsertRanger(FirebaseUser user) {
@@ -231,16 +243,16 @@ public final class AppRepository {
         io.execute(() -> upsertRanger(resolveCurrentUser()));
     }
 
-    public List<SightingEntity> getPendingSightings(int limit) {
-        return database.sightingDao().getPending(new String[]{SyncState.PENDING, SyncState.FAILED}, limit);
+    public List<SightingEntity> getPendingSightings(String rangerId, int limit) {
+        return database.sightingDao().getPending(rangerId, new String[]{SyncState.PENDING, SyncState.FAILED}, limit);
     }
 
-    public List<PatrolLogEntity> getPendingPatrolLogs(int limit) {
-        return database.patrolLogDao().getPending(new String[]{SyncState.PENDING, SyncState.FAILED}, limit);
+    public List<PatrolLogEntity> getPendingPatrolLogs(String rangerId, int limit) {
+        return database.patrolLogDao().getPending(rangerId, new String[]{SyncState.PENDING, SyncState.FAILED}, limit);
     }
 
-    public List<HealthObservationEntity> getPendingHealthObservations(int limit) {
-        return database.healthObservationDao().getPending(new String[]{SyncState.PENDING, SyncState.FAILED}, limit);
+    public List<HealthObservationEntity> getPendingHealthObservations(String rangerId, int limit) {
+        return database.healthObservationDao().getPending(rangerId, new String[]{SyncState.PENDING, SyncState.FAILED}, limit);
     }
 
     public void markSightingSyncing(SightingEntity entity) {
@@ -299,7 +311,7 @@ public final class AppRepository {
 
     public void mergeRemoteSightings(List<SightingEntity> entities) {
         for (SightingEntity entity : entities) {
-            SightingEntity local = database.sightingDao().getById(entity.localId);
+            SightingEntity local = database.sightingDao().getById(entity.rangerId, entity.localId);
             if (shouldReplace(local, entity.lastModifiedAt)) {
                 database.sightingDao().upsert(entity);
             }
@@ -308,7 +320,7 @@ public final class AppRepository {
 
     public void mergeRemotePatrolLogs(List<PatrolLogEntity> entities) {
         for (PatrolLogEntity entity : entities) {
-            PatrolLogEntity local = database.patrolLogDao().getById(entity.localId);
+            PatrolLogEntity local = database.patrolLogDao().getById(entity.rangerId, entity.localId);
             if (shouldReplace(local, entity.lastModifiedAt)) {
                 database.patrolLogDao().upsert(entity);
             }
@@ -317,7 +329,7 @@ public final class AppRepository {
 
     public void mergeRemoteHealthObservations(List<HealthObservationEntity> entities) {
         for (HealthObservationEntity entity : entities) {
-            HealthObservationEntity local = database.healthObservationDao().getById(entity.localId);
+            HealthObservationEntity local = database.healthObservationDao().getById(entity.rangerId, entity.localId);
             if (shouldReplace(local, entity.lastModifiedAt)) {
                 database.healthObservationDao().upsert(entity);
             }
@@ -328,16 +340,16 @@ public final class AppRepository {
         database.appNotificationDao().upsertAll(entities);
     }
 
-    public void markNotificationRead(String recipientUserId, String notificationId) {
-        io.execute(() -> database.appNotificationDao().markRead(recipientUserId, notificationId));
+    public void markNotificationRead(String rangerId, String notificationId) {
+        io.execute(() -> database.appNotificationDao().markRead(rangerId, notificationId));
     }
 
-    public void markAllNotificationsRead(String recipientUserId) {
-        io.execute(() -> database.appNotificationDao().markAllRead(recipientUserId));
+    public void markAllNotificationsRead(String rangerId) {
+        io.execute(() -> database.appNotificationDao().markAllRead(rangerId));
     }
 
-    public List<AppNotificationEntity> getPendingSystemNotifications(String recipientUserId) {
-        return database.appNotificationDao().getPendingSystemNotifications(recipientUserId);
+    public List<AppNotificationEntity> getPendingSystemNotifications(String rangerId) {
+        return database.appNotificationDao().getPendingSystemNotifications(rangerId);
     }
 
     public void markNotificationSystemNotified(String notificationId) {
@@ -481,7 +493,7 @@ public final class AppRepository {
                 entity.title,
                 entity.notes,
                 entity.timestamp,
-                entity.authorId,
+                entity.rangerId,
                 entity.authorName,
                 entity.syncStatus,
                 entity.lastSyncAttempt,
@@ -496,7 +508,7 @@ public final class AppRepository {
         }
         return new AppNotificationRecord(
                 entity.notificationId,
-                entity.recipientUserId,
+                entity.rangerId,
                 entity.actorUserId,
                 entity.actorName,
                 entity.recordId,

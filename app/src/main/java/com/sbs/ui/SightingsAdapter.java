@@ -100,7 +100,7 @@ public final class SightingsAdapter extends ListAdapter<SightingRecord, Sighting
 
             itemView.setOnClickListener(v -> actionListener.onOpen(record));
 
-            boolean canEdit = record.authorId != null && record.authorId.equals(FirebaseAuth.getInstance().getUid());
+            boolean canEdit = record.rangerId != null && record.rangerId.equals(FirebaseAuth.getInstance().getUid());
             actions.setVisibility(canEdit ? View.VISIBLE : View.GONE);
             edit.setOnClickListener(v -> actionListener.onEdit(record));
             delete.setOnClickListener(v -> actionListener.onDelete(record));

@@ -56,7 +56,7 @@ public class PatrolLogsActivity extends BaseActivity implements PatrolLogsAdapte
             editorLauncher.launch(intent);
         });
 
-        repository.observePatrolLogs().observe(this, records -> {
+        repository.observePatrolLogs(currentUserId).observe(this, records -> {
             adapter.submitList(records);
             emptyState.setVisibility(records == null || records.isEmpty() ? View.VISIBLE : View.GONE);
         });
@@ -76,7 +76,7 @@ public class PatrolLogsActivity extends BaseActivity implements PatrolLogsAdapte
                 .setTitle("Delete Patrol Log")
                 .setMessage("Are you sure you want to delete this log locally?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    repository.deletePatrolLog(record.localId);
+                    repository.deletePatrolLog(currentUserId, record.localId);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

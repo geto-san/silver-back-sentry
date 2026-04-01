@@ -2,7 +2,7 @@ package com.sbs.data;
 
 public class AppNotificationRecord {
     public final String notificationId;
-    public final String recipientUserId;
+    public final String rangerId;
     public final String actorUserId;
     public final String actorName;
     public final String recordId;
@@ -15,7 +15,7 @@ public class AppNotificationRecord {
 
     public AppNotificationRecord(
             String notificationId,
-            String recipientUserId,
+            String rangerId,
             String actorUserId,
             String actorName,
             String recordId,
@@ -27,7 +27,7 @@ public class AppNotificationRecord {
             String destination
     ) {
         this.notificationId = notificationId;
-        this.recipientUserId = recipientUserId;
+        this.rangerId = rangerId;
         this.actorUserId = actorUserId;
         this.actorName = actorName;
         this.recordId = recordId;

@@ -36,11 +36,16 @@ public final class UploadPendingDataWorker extends Worker {
             return Result.retry();
         }
 
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) {
+            return Result.failure();
+        }
+
         AppRepository repository = AppRepository.getInstance(getApplicationContext());
         try {
-            syncSightings(repository.getPendingSightings(BATCH_LIMIT), repository);
-            syncPatrolLogs(repository.getPendingPatrolLogs(BATCH_LIMIT), repository);
-            syncHealthObservations(repository.getPendingHealthObservations(BATCH_LIMIT), repository);
+            syncSightings(repository.getPendingSightings(currentUserId, BATCH_LIMIT), repository);
+            syncPatrolLogs(repository.getPendingPatrolLogs(currentUserId, BATCH_LIMIT), repository);
+            syncHealthObservations(repository.getPendingHealthObservations(currentUserId, BATCH_LIMIT), repository);
             return Result.success();
         } catch (Exception ignored) {
             return Result.retry();
@@ -80,7 +85,7 @@ public final class UploadPendingDataWorker extends Worker {
             repository.markHealthObservationSyncing(entity);
             try {
                 writeSharedRecord(entity.localId, buildHealthPayload(entity));
-                fanOutNotification(entity.localId, RecordType.HEALTH_OBSERVATION, entity.authorId, entity.authorName, entity.title, notificationMessage(RecordType.HEALTH_OBSERVATION, entity.authorName));
+                fanOutNotification(entity.localId, RecordType.HEALTH_OBSERVATION, entity.rangerId, entity.authorName, entity.title, notificationMessage(RecordType.HEALTH_OBSERVATION, entity.authorName));
                 repository.markHealthObservationSynced(entity, entity.localId);
             } catch (Exception e) {
                 repository.markHealthObservationFailed(entity);
@@ -111,7 +116,7 @@ public final class UploadPendingDataWorker extends Worker {
             }
             Map<String, Object> payload = new HashMap<>();
             payload.put("notificationId", recipientId + "_" + recordType + "_" + recordId);
-            payload.put("recipientUserId", recipientId);
+            payload.put("rangerId", recipientId);
             payload.put("actorUserId", actorUserId);
             payload.put("actorName", actorName);
             payload.put("recordId", recordId);
@@ -149,7 +154,7 @@ public final class UploadPendingDataWorker extends Worker {
     }
 
     private Map<String, Object> buildHealthPayload(HealthObservationEntity entity) {
-        Map<String, Object> payload = basePayload(entity.localId, RecordType.HEALTH_OBSERVATION, entity.authorId, entity.authorName, entity.title, entity.notes, entity.timestamp, entity.lastModifiedAt);
+        Map<String, Object> payload = basePayload(entity.localId, RecordType.HEALTH_OBSERVATION, entity.rangerId, entity.authorName, entity.title, entity.notes, entity.timestamp, entity.lastModifiedAt);
         payload.put("latitude", entity.latitude);
         payload.put("longitude", entity.longitude);
         return payload;

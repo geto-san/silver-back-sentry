@@ -48,7 +48,7 @@ public class SightingEditorActivity extends BaseActivity {
 
         existingSightingId = getIntent().getStringExtra("sighting_id");
         if (existingSightingId != null) {
-            repository.loadSighting(existingSightingId, record -> {
+            repository.loadSighting(authorId, existingSightingId, record -> {
                 existingRecord = record;
                 if (record == null) {
                     return;

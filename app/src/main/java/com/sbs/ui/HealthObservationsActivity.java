@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.sbs.R;
 import com.sbs.data.AppRepository;
@@ -23,6 +24,7 @@ public final class HealthObservationsActivity extends BaseActivity implements He
     private AppRepository repository;
     private HealthObservationsAdapter adapter;
     private View emptyState;
+    private String currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,11 @@ public final class HealthObservationsActivity extends BaseActivity implements He
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
         repository = AppRepository.getInstance(this);
+        currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) {
+            finish();
+            return;
+        }
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
@@ -44,7 +51,7 @@ public final class HealthObservationsActivity extends BaseActivity implements He
         findViewById(R.id.fabAddHealthObservation).setOnClickListener(v ->
                 editorLauncher.launch(new Intent(this, HealthObservationEditorActivity.class)));
 
-        repository.observeHealthObservations().observe(this, records -> {
+        repository.observeHealthObservations(currentUserId).observe(this, records -> {
             adapter.submitList(records);
             emptyState.setVisibility(records == null || records.isEmpty() ? View.VISIBLE : View.GONE);
         });
@@ -70,7 +77,7 @@ public final class HealthObservationsActivity extends BaseActivity implements He
         new AlertDialog.Builder(this)
                 .setTitle(R.string.delete)
                 .setMessage("Delete this health observation locally?")
-                .setPositiveButton(R.string.delete, (dialog, which) -> repository.deleteHealthObservation(record.localId))
+                .setPositiveButton(R.string.delete, (dialog, which) -> repository.deleteHealthObservation(currentUserId, record.localId))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }

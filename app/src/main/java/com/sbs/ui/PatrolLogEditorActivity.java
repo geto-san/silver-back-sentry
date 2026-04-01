@@ -44,7 +44,7 @@ public class PatrolLogEditorActivity extends BaseActivity {
 
         existingLogId = getIntent().getStringExtra("log_id");
         if (existingLogId != null) {
-            repository.loadPatrolLog(existingLogId, record -> {
+            repository.loadPatrolLog(authorId, existingLogId, record -> {
                 existingRecord = record;
                 if (record == null) {
                     return;

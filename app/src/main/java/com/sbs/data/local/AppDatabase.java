@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
                 HealthObservationEntity.class,
                 AppNotificationEntity.class
         },
-        version = 3,
+        version = 4,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -27,30 +27,6 @@ public abstract class AppDatabase extends RoomDatabase {
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE sightings ADD COLUMN lastModifiedAt INTEGER NOT NULL DEFAULT 0");
             database.execSQL("ALTER TABLE patrol_logs ADD COLUMN lastModifiedAt INTEGER NOT NULL DEFAULT 0");
-        }
-    };
-
-    public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `health_observations` (" +
-                            "`localId` TEXT NOT NULL, `remoteId` TEXT, `authorId` TEXT, `authorName` TEXT, " +
-                            "`title` TEXT, `notes` TEXT, `timestamp` INTEGER NOT NULL, `latitude` REAL NOT NULL, " +
-                            "`longitude` REAL NOT NULL, `syncStatus` TEXT, `lastSyncAttempt` INTEGER NOT NULL, " +
-                            "`lastModifiedAt` INTEGER NOT NULL, PRIMARY KEY(`localId`))"
-            );
-            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_health_observations_remoteId` ON `health_observations` (`remoteId`)");
-            database.execSQL("CREATE INDEX IF NOT EXISTS `index_health_observations_timestamp` ON `health_observations` (`timestamp`)");
-            database.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `app_notifications` (" +
-                            "`notificationId` TEXT NOT NULL, `recipientUserId` TEXT, `actorUserId` TEXT, `actorName` TEXT, " +
-                            "`recordId` TEXT, `recordType` TEXT, `title` TEXT, `message` TEXT, `createdAt` INTEGER NOT NULL, " +
-                            "`isRead` INTEGER NOT NULL, `destination` TEXT, `systemNotified` INTEGER NOT NULL, " +
-                            "PRIMARY KEY(`notificationId`))"
-            );
-            database.execSQL("CREATE INDEX IF NOT EXISTS `index_app_notifications_recipientUserId` ON `app_notifications` (`recipientUserId`)");
-            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_app_notifications_recipientUserId_recordId_recordType` ON `app_notifications` (`recipientUserId`, `recordId`, `recordType`)");
         }
     };
 
@@ -77,6 +53,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             )
                             .addMigrations(MIGRATION_1_2)
                             .addMigrations(MIGRATION_2_3)
+                            .addMigrations(MIGRATION_3_4)
                             .build();
                 }
             }

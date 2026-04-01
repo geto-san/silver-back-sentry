@@ -2,14 +2,21 @@ package com.sbs.data.local;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 @Entity(
         tableName = "app_notifications",
+        foreignKeys = @ForeignKey(
+                entity = RangerEntity.class,
+                parentColumns = "rangerId",
+                childColumns = "rangerId",
+                onDelete = ForeignKey.CASCADE
+        ),
         indices = {
-                @Index("recipientUserId"),
-                @Index(value = {"recipientUserId", "recordId", "recordType"}, unique = true)
+                @Index("rangerId"),
+                @Index(value = {"rangerId", "recordId", "recordType"}, unique = true)
         }
 )
 public class AppNotificationEntity {
@@ -18,7 +25,9 @@ public class AppNotificationEntity {
     @NonNull
     public String notificationId;
 
-    public String recipientUserId;
+    @NonNull
+    public String rangerId;
+
     public String actorUserId;
     public String actorName;
     public String recordId;
@@ -32,7 +41,7 @@ public class AppNotificationEntity {
 
     public AppNotificationEntity(
             @NonNull String notificationId,
-            String recipientUserId,
+            @NonNull String rangerId,
             String actorUserId,
             String actorName,
             String recordId,
@@ -45,7 +54,7 @@ public class AppNotificationEntity {
             boolean systemNotified
     ) {
         this.notificationId = notificationId;
-        this.recipientUserId = recipientUserId;
+        this.rangerId = rangerId;
         this.actorUserId = actorUserId;
         this.actorName = actorName;
         this.recordId = recordId;
