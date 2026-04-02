@@ -5,11 +5,7 @@ plugins {
 
 android {
     namespace = "com.sbs"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.sbs"
@@ -39,6 +35,12 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -48,6 +50,10 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.10.0")
+    implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.work:work-runtime:2.11.1")
+    annotationProcessor("androidx.room:room-compiler:2.8.4")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
@@ -65,6 +71,9 @@ dependencies {
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core:1.6.1")
+
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }

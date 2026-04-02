@@ -51,10 +51,47 @@ public final class PatrolLogStore {
         return record;
     }
 
+    public static void updateLog(Context context, PatrolLogRecord record) {
+        JSONArray array = readArray(context);
+        for (int i = 0; i < array.length(); i++) {
+            try {
+                JSONObject obj = array.getJSONObject(i);
+                if (record.localId.equals(obj.optString("localId"))) {
+                    array.put(i, toJson(record));
+                    persistArray(context, array);
+                    return;
+                }
+            } catch (JSONException ignored) {}
+        }
+    }
+
+    public static void deleteLog(Context context, String localId) {
+        JSONArray array = readArray(context);
+        JSONArray next = new JSONArray();
+        for (int i = 0; i < array.length(); i++) {
+            try {
+                JSONObject obj = array.getJSONObject(i);
+                if (!localId.equals(obj.optString("localId"))) {
+                    next.put(obj);
+                }
+            } catch (JSONException ignored) {}
+        }
+        persistArray(context, next);
+    }
+
     public static List<PatrolLogRecord> getAll(Context context) {
         List<PatrolLogRecord> records = readAll(context);
         Collections.sort(records, Comparator.comparingLong(r -> -r.timestamp));
         return records;
+    }
+
+    public static PatrolLogRecord getById(Context context, String localId) {
+        for (PatrolLogRecord record : readAll(context)) {
+            if (record.localId.equals(localId)) {
+                return record;
+            }
+        }
+        return null;
     }
 
     public static void updateSyncStatus(Context context, String localId, String firestoreId, String status) {

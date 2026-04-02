@@ -4,14 +4,14 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.sbs.R;
-import com.sbs.data.AppSettingsManager;
+import com.sbs.data.AppRepository;
 import com.sbs.data.SightingRecord;
-import com.sbs.data.SightingStore;
-import com.sbs.data.SightingSyncManager;
+import com.sbs.data.SyncScheduler;
 
 public class SightingEditorActivity extends BaseActivity {
 
@@ -20,7 +20,10 @@ public class SightingEditorActivity extends BaseActivity {
     private TextInputEditText etRadius;
     private double lat;
     private double lng;
-    private AppSettingsManager appSettingsManager;
+    private String existingSightingId;
+    private SightingRecord existingRecord;
+    private AppRepository repository;
+    private String authorId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +31,12 @@ public class SightingEditorActivity extends BaseActivity {
         setContentView(R.layout.activity_sighting_editor);
         applyWindowInsets(findViewById(R.id.toolbar).getRootView());
 
-        appSettingsManager = new AppSettingsManager(this);
+        repository = AppRepository.getInstance(this);
+        authorId = FirebaseAuth.getInstance().getUid();
+        if (authorId == null) {
+            finish();
+            return;
+        }
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
@@ -38,8 +46,24 @@ public class SightingEditorActivity extends BaseActivity {
         etRadius = findViewById(R.id.etRadius);
         MaterialButton btnSave = findViewById(R.id.btnSaveSighting);
 
-        lat = getIntent().getDoubleExtra("lat", 0.0);
-        lng = getIntent().getDoubleExtra("lng", 0.0);
+        existingSightingId = getIntent().getStringExtra("sighting_id");
+        if (existingSightingId != null) {
+            repository.loadSighting(authorId, existingSightingId, record -> {
+                existingRecord = record;
+                if (record == null) {
+                    return;
+                }
+                toolbar.setTitle(R.string.edit_sighting);
+                etTitle.setText(record.title);
+                etNotes.setText(record.notes);
+                etRadius.setText(String.valueOf(record.radius));
+                lat = record.lat;
+                lng = record.lng;
+            });
+        } else {
+            lat = getIntent().getDoubleExtra("lat", 0.0);
+            lng = getIntent().getDoubleExtra("lng", 0.0);
+        }
 
         btnSave.setOnClickListener(v -> saveSighting());
         
@@ -63,19 +87,28 @@ public class SightingEditorActivity extends BaseActivity {
             if (!TextUtils.isEmpty(radiusText)) radius = Float.parseFloat(radiusText);
         } catch (NumberFormatException ignored) {}
 
-        String authorId = SightingSyncManager.resolveAuthorId();
-        String authorName = SightingSyncManager.resolveAuthorName();
-        
-        SightingRecord record = SightingStore.createSighting(
-                this, title, notes, lat, lng, System.currentTimeMillis(),
-                authorId, authorName, null, null, null, radius
+        long timestamp = existingRecord != null ? existingRecord.timestamp : System.currentTimeMillis();
+        repository.saveSighting(
+                authorId,
+                existingRecord != null ? existingRecord.localId : null,
+                title,
+                notes,
+                lat,
+                lng,
+                timestamp,
+                radius,
+                existingRecord != null ? existingRecord.audioPath : null,
+                existingRecord != null ? existingRecord.imagePath : null,
+                existingRecord != null ? existingRecord.videoPath : null,
+                record -> {
+                    SyncScheduler.enqueueSync(this);
+                    setResult(RESULT_OK);
+                    finish();
+                }
         );
+    }
 
-        if (appSettingsManager.isAutoSyncEnabled() && SightingSyncManager.isOnline(this)) {
-            SightingSyncManager.syncSighting(this, record);
-        }
-
-        setResult(RESULT_OK);
-        finish();
+    private String valueOf(TextInputEditText editText) {
+        return editText.getText() != null ? editText.getText().toString().trim() : "";
     }
 }

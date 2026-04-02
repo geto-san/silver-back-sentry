@@ -12,11 +12,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        tools:node="replace" />
 
     <application
+        android:name=".app.SbsApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -39,10 +37,22 @@
             android:name=".ui.PatrolLogsActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.DeviceInfoActivity"
+            android:name=".ui.PatrolLogEditorActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.HealthObservationsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.HealthObservationEditorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.NotificationsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.RecordDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.DeviceInfoActivity"
             android:exported="false" />
         <activity
             android:name=".ui.SignUpActivity"
