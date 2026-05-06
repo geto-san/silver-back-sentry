@@ -225,6 +225,25 @@ public final class AppRepository {
         io.execute(() -> database.healthObservationDao().delete(rangerId, localId));
     }
 
+    public void upsertRanger(String rangerId, String fullName) {
+        if (TextUtils.isEmpty(rangerId)) return;
+        long now = System.currentTimeMillis();
+        RangerEntity existing = database.rangerDao().getById(rangerId);
+        if (existing == null) {
+            database.rangerDao().upsert(new RangerEntity(
+                    rangerId,
+                    fullName,
+                    null,
+                    now,
+                    now
+            ));
+        } else if (!TextUtils.isEmpty(fullName) && !fullName.equals(existing.fullName)) {
+            existing.fullName = fullName;
+            existing.updatedAt = now;
+            database.rangerDao().upsert(existing);
+        }
+    }
+
     public void upsertRanger(FirebaseUser user) {
         if (user == null) {
             return;
@@ -309,35 +328,82 @@ public final class AppRepository {
         database.healthObservationDao().upsert(entity);
     }
 
+    public void mergeRemoteSighting(SightingEntity entity) {
+        upsertRanger(entity.rangerId, entity.authorName);
+        SightingEntity local = database.sightingDao().getById(entity.rangerId, entity.localId);
+        if (shouldReplace(local, entity.lastModifiedAt)) {
+            database.sightingDao().upsert(entity);
+        }
+    }
+
     public void mergeRemoteSightings(List<SightingEntity> entities) {
         for (SightingEntity entity : entities) {
-            SightingEntity local = database.sightingDao().getById(entity.rangerId, entity.localId);
-            if (shouldReplace(local, entity.lastModifiedAt)) {
-                database.sightingDao().upsert(entity);
-            }
+            mergeRemoteSighting(entity);
+        }
+    }
+
+    public void mergeRemotePatrolLog(PatrolLogEntity entity) {
+        upsertRanger(entity.rangerId, entity.authorName);
+        PatrolLogEntity local = database.patrolLogDao().getById(entity.rangerId, entity.localId);
+        if (shouldReplace(local, entity.lastModifiedAt)) {
+            database.patrolLogDao().upsert(entity);
         }
     }
 
     public void mergeRemotePatrolLogs(List<PatrolLogEntity> entities) {
         for (PatrolLogEntity entity : entities) {
-            PatrolLogEntity local = database.patrolLogDao().getById(entity.rangerId, entity.localId);
-            if (shouldReplace(local, entity.lastModifiedAt)) {
-                database.patrolLogDao().upsert(entity);
-            }
+            mergeRemotePatrolLog(entity);
+        }
+    }
+
+    public void mergeRemoteHealthObservation(HealthObservationEntity entity) {
+        upsertRanger(entity.rangerId, entity.authorName);
+        HealthObservationEntity local = database.healthObservationDao().getById(entity.rangerId, entity.localId);
+        if (shouldReplace(local, entity.lastModifiedAt)) {
+            database.healthObservationDao().upsert(entity);
         }
     }
 
     public void mergeRemoteHealthObservations(List<HealthObservationEntity> entities) {
         for (HealthObservationEntity entity : entities) {
-            HealthObservationEntity local = database.healthObservationDao().getById(entity.rangerId, entity.localId);
-            if (shouldReplace(local, entity.lastModifiedAt)) {
-                database.healthObservationDao().upsert(entity);
-            }
+            mergeRemoteHealthObservation(entity);
+        }
+    }
+
+    public void mergeNotification(AppNotificationEntity entity) {
+        upsertRanger(entity.rangerId, null);
+        upsertRanger(entity.actorUserId, entity.actorName);
+        
+        AppNotificationEntity existing = database.appNotificationDao().getById(entity.notificationId);
+        if (existing == null) {
+            database.appNotificationDao().insertOrIgnore(entity);
+        } else {
+            // Preserve local notified status to prevent notification flooding
+            entity.systemNotified = existing.systemNotified;
+            database.appNotificationDao().update(entity);
         }
     }
 
     public void mergeNotifications(List<AppNotificationEntity> entities) {
-        database.appNotificationDao().upsertAll(entities);
+        for (AppNotificationEntity entity : entities) {
+            mergeNotification(entity);
+        }
+    }
+
+    public void deleteRemoteSighting(String rangerId, String localId) {
+        database.sightingDao().delete(rangerId, localId);
+    }
+
+    public void deleteRemotePatrolLog(String rangerId, String localId) {
+        database.patrolLogDao().delete(rangerId, localId);
+    }
+
+    public void deleteRemoteHealthObservation(String rangerId, String localId) {
+        database.healthObservationDao().delete(rangerId, localId);
+    }
+
+    public void deleteNotification(String notificationId) {
+        database.appNotificationDao().delete(notificationId);
     }
 
     public void markNotificationRead(String rangerId, String notificationId) {

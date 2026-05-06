@@ -214,7 +214,7 @@ public final class SightingStore {
             obj.put("lat", record.lat);
             obj.put("lng", record.lng);
             obj.put("timestamp", record.timestamp);
-            obj.put("authorId", record.authorId);
+//            obj.put("authorId", record.authorId);
             obj.put("authorName", record.authorName);
             obj.put("syncStatus", record.syncStatus);
             obj.put("lastSyncAttempt", record.lastSyncAttempt);

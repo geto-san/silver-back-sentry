@@ -5,6 +5,8 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Transaction;
+import androidx.room.Update;
 
 import java.util.List;
 
@@ -23,11 +25,28 @@ public interface AppNotificationDao {
     @Query("SELECT * FROM app_notifications WHERE rangerId = :rangerId AND systemNotified = 0 ORDER BY createdAt ASC")
     List<AppNotificationEntity> getPendingSystemNotifications(String rangerId);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void upsert(AppNotificationEntity entity);
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    void insertOrIgnore(AppNotificationEntity entity);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void upsertAll(List<AppNotificationEntity> entities);
+    @Update
+    void update(AppNotificationEntity entity);
+
+    @Transaction
+    default void safeMerge(List<AppNotificationEntity> entities) {
+        for (AppNotificationEntity entity : entities) {
+            AppNotificationEntity existing = getById(entity.notificationId);
+            if (existing == null) {
+                insertOrIgnore(entity);
+            } else {
+                // Preserve the local systemNotified flag
+                entity.systemNotified = existing.systemNotified;
+                update(entity);
+            }
+        }
+    }
+
+    @Query("SELECT * FROM app_notifications WHERE notificationId = :id LIMIT 1")
+    AppNotificationEntity getById(String id);
 
     @Query("UPDATE app_notifications SET isRead = 1 WHERE rangerId = :rangerId AND notificationId = :notificationId")
     void markRead(String rangerId, String notificationId);
@@ -37,4 +56,7 @@ public interface AppNotificationDao {
 
     @Query("UPDATE app_notifications SET systemNotified = 1 WHERE notificationId = :notificationId")
     void markSystemNotified(String notificationId);
+
+    @Query("DELETE FROM app_notifications WHERE notificationId = :notificationId")
+    void delete(String notificationId);
 }

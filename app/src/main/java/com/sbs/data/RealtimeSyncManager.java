@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -52,6 +53,7 @@ public final class RealtimeSyncManager {
         stop();
         activeUserId = userId;
         AppRepository repository = AppRepository.getInstance(appContext);
+        final long listenerStartTime = System.currentTimeMillis();
 
         sharedRecordsListener = FirebaseFirestore.getInstance()
                 .collection("shared_records")
@@ -59,12 +61,24 @@ public final class RealtimeSyncManager {
                     if (error != null || snapshots == null) {
                         return;
                     }
-                    List<SightingEntity> sightings = new ArrayList<>();
-                    List<PatrolLogEntity> patrolLogs = new ArrayList<>();
-                    List<HealthObservationEntity> healthObservations = new ArrayList<>();
-                    for (QueryDocumentSnapshot doc : snapshots) {
+                    for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                        QueryDocumentSnapshot doc = dc.getDocument();
                         String type = doc.getString("type");
                         String recordId = doc.getString("recordId");
+
+                        if (dc.getType() == DocumentChange.Type.REMOVED) {
+                            repository.runOnIo(() -> {
+                                if (RecordType.SIGHTING.equals(type)) {
+                                    repository.deleteRemoteSighting(doc.getString("rangerId"), recordId);
+                                } else if (RecordType.PATROL_LOG.equals(type)) {
+                                    repository.deleteRemotePatrolLog(doc.getString("rangerId"), recordId);
+                                } else if (RecordType.HEALTH_OBSERVATION.equals(type)) {
+                                    repository.deleteRemoteHealthObservation(doc.getString("rangerId"), recordId);
+                                }
+                            });
+                            continue;
+                        }
+
                         if (TextUtils.isEmpty(type) || TextUtils.isEmpty(recordId)) {
                             continue;
                         }
@@ -74,62 +88,60 @@ public final class RealtimeSyncManager {
                         String authorDisplayName = doc.getString("authorDisplayName");
                         String title = doc.getString("title");
                         String summary = doc.getString("summary");
-                        if (RecordType.SIGHTING.equals(type)) {
-                            sightings.add(new SightingEntity(
-                                    recordId,
-                                    doc.getId(),
-                                    authorId == null ? "" : authorId,
-                                    authorDisplayName,
-                                    title,
-                                    summary,
-                                    doc.getDouble("latitude") == null ? 0.0 : doc.getDouble("latitude"),
-                                    doc.getDouble("longitude") == null ? 0.0 : doc.getDouble("longitude"),
-                                    createdAt,
-                                    doc.getDouble("radius") == null ? 0f : doc.getDouble("radius").floatValue(),
-                                    doc.getString("audioPath"),
-                                    doc.getString("imagePath"),
-                                    doc.getString("videoPath"),
-                                    SyncState.SYNCED,
-                                    updatedAt,
-                                    updatedAt
-                            ));
-                        } else if (RecordType.PATROL_LOG.equals(type)) {
-                            patrolLogs.add(new PatrolLogEntity(
-                                    recordId,
-                                    doc.getId(),
-                                    authorId == null ? "" : authorId,
-                                    authorDisplayName,
-                                    title,
-                                    summary,
-                                    createdAt,
-                                    doc.getString("audioPath"),
-                                    doc.getString("videoPath"),
-                                    SyncState.SYNCED,
-                                    updatedAt,
-                                    updatedAt
-                            ));
-                        } else if (RecordType.HEALTH_OBSERVATION.equals(type)) {
-                            healthObservations.add(new HealthObservationEntity(
-                                    recordId,
-                                    doc.getId(),
-                                    authorId == null ? "" : authorId,
-                                    authorDisplayName,
-                                    title,
-                                    summary,
-                                    createdAt,
-                                    doc.getDouble("latitude") == null ? 0.0 : doc.getDouble("latitude"),
-                                    doc.getDouble("longitude") == null ? 0.0 : doc.getDouble("longitude"),
-                                    SyncState.SYNCED,
-                                    updatedAt,
-                                    updatedAt
-                            ));
-                        }
+
+                        repository.runOnIo(() -> {
+                            if (RecordType.SIGHTING.equals(type)) {
+                                repository.mergeRemoteSighting(new SightingEntity(
+                                        recordId,
+                                        doc.getId(),
+                                        authorId == null ? "" : authorId,
+                                        authorDisplayName,
+                                        title,
+                                        summary,
+                                        doc.getDouble("latitude") == null ? 0.0 : doc.getDouble("latitude"),
+                                        doc.getDouble("longitude") == null ? 0.0 : doc.getDouble("longitude"),
+                                        createdAt,
+                                        doc.getDouble("radius") == null ? 0f : doc.getDouble("radius").floatValue(),
+                                        doc.getString("audioPath"),
+                                        doc.getString("imagePath"),
+                                        doc.getString("videoPath"),
+                                        SyncState.SYNCED,
+                                        updatedAt,
+                                        updatedAt
+                                ));
+                            } else if (RecordType.PATROL_LOG.equals(type)) {
+                                repository.mergeRemotePatrolLog(new PatrolLogEntity(
+                                        recordId,
+                                        doc.getId(),
+                                        authorId == null ? "" : authorId,
+                                        authorDisplayName,
+                                        title,
+                                        summary,
+                                        createdAt,
+                                        doc.getString("audioPath"),
+                                        doc.getString("videoPath"),
+                                        SyncState.SYNCED,
+                                        updatedAt,
+                                        updatedAt
+                                ));
+                            } else if (RecordType.HEALTH_OBSERVATION.equals(type)) {
+                                repository.mergeRemoteHealthObservation(new HealthObservationEntity(
+                                        recordId,
+                                        doc.getId(),
+                                        authorId == null ? "" : authorId,
+                                        authorDisplayName,
+                                        title,
+                                        summary,
+                                        createdAt,
+                                        doc.getDouble("latitude") == null ? 0.0 : doc.getDouble("latitude"),
+                                        doc.getDouble("longitude") == null ? 0.0 : doc.getDouble("longitude"),
+                                        SyncState.SYNCED,
+                                        updatedAt,
+                                        updatedAt
+                                ));
+                            }
+                        });
                     }
-                    repository.runOnIo(() -> {
-                        repository.mergeRemoteSightings(sightings);
-                        repository.mergeRemotePatrolLogs(patrolLogs);
-                        repository.mergeRemoteHealthObservations(healthObservations);
-                    });
                 });
 
         notificationsListener = FirebaseFirestore.getInstance()
@@ -140,25 +152,39 @@ public final class RealtimeSyncManager {
                     if (error != null || snapshots == null) {
                         return;
                     }
-                    List<AppNotificationEntity> items = new ArrayList<>();
-                    for (QueryDocumentSnapshot doc : snapshots) {
-                        items.add(new AppNotificationEntity(
-                                doc.getId(),
-                                userId,
-                                doc.getString("actorUserId"),
-                                doc.getString("actorName"),
-                                doc.getString("recordId"),
-                                doc.getString("recordType"),
-                                doc.getString("title"),
-                                doc.getString("message"),
-                                doc.getLong("createdAt") == null ? System.currentTimeMillis() : doc.getLong("createdAt"),
-                                Boolean.TRUE.equals(doc.getBoolean("isRead")),
-                                doc.getString("destination"),
-                                false
-                        ));
-                    }
                     repository.runOnIo(() -> {
-                        repository.mergeNotifications(items);
+                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            QueryDocumentSnapshot doc = dc.getDocument();
+                            if (dc.getType() == DocumentChange.Type.REMOVED) {
+                                repository.deleteNotification(doc.getId());
+                                continue;
+                            }
+
+                            long createdAt = doc.getLong("createdAt") == null ? System.currentTimeMillis() : doc.getLong("createdAt");
+                            
+                            // If this notification is older than when we started the listener, 
+                            // mark it as already system-notified to prevent historical flooding 
+                            // on fresh installs or re-logins.
+                            boolean alreadyNotified = createdAt < (listenerStartTime - 10000); // 10s buffer
+
+                            AppNotificationEntity item = new AppNotificationEntity(
+                                    doc.getId(),
+                                    userId,
+                                    doc.getString("actorUserId"),
+                                    doc.getString("actorName"),
+                                    doc.getString("recordId"),
+                                    doc.getString("recordType"),
+                                    doc.getString("title"),
+                                    doc.getString("message"),
+                                    createdAt,
+                                    Boolean.TRUE.equals(doc.getBoolean("isRead")),
+                                    doc.getString("destination"),
+                                    alreadyNotified
+                            );
+                            repository.mergeNotification(item);
+                        }
+
+                        // After merging all changes in this batch, check for any that need system notifications
                         for (AppNotificationEntity pending : repository.getPendingSystemNotifications(userId)) {
                             AppNotificationHelper.showRecordNotification(appContext, new AppNotificationRecord(
                                     pending.notificationId,

@@ -1,0 +1,549 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 4,
+    "identityHash": "3f2e38ad485b7e77e7312c2b4fc2b705",
+    "entities": [
+      {
+        "tableName": "rangers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rangerId` TEXT NOT NULL, `fullName` TEXT, `email` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`rangerId`))",
+        "fields": [
+          {
+            "fieldPath": "rangerId",
+            "columnName": "rangerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fullName",
+            "columnName": "fullName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rangerId"
+          ]
+        }
+      },
+      {
+        "tableName": "sightings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` TEXT NOT NULL, `remoteId` TEXT, `rangerId` TEXT NOT NULL, `authorName` TEXT, `title` TEXT, `notes` TEXT, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `timestamp` INTEGER NOT NULL, `radius` REAL NOT NULL, `audioPath` TEXT, `imagePath` TEXT, `videoPath` TEXT, `syncStatus` TEXT, `lastSyncAttempt` INTEGER NOT NULL, `lastModifiedAt` INTEGER NOT NULL, PRIMARY KEY(`localId`), FOREIGN KEY(`rangerId`) REFERENCES `rangers`(`rangerId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remoteId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rangerId",
+            "columnName": "rangerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorName",
+            "columnName": "authorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radius",
+            "columnName": "radius",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "audioPath",
+            "columnName": "audioPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imagePath",
+            "columnName": "imagePath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "videoPath",
+            "columnName": "videoPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "syncStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastSyncAttempt",
+            "columnName": "lastSyncAttempt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastModifiedAt",
+            "columnName": "lastModifiedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "localId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sightings_rangerId",
+            "unique": false,
+            "columnNames": [
+              "rangerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sightings_rangerId` ON `${TABLE_NAME}` (`rangerId`)"
+          },
+          {
+            "name": "index_sightings_remoteId",
+            "unique": true,
+            "columnNames": [
+              "remoteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_sightings_remoteId` ON `${TABLE_NAME}` (`remoteId`)"
+          },
+          {
+            "name": "index_sightings_rangerId_timestamp",
+            "unique": false,
+            "columnNames": [
+              "rangerId",
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sightings_rangerId_timestamp` ON `${TABLE_NAME}` (`rangerId`, `timestamp`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "rangers",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "rangerId"
+            ],
+            "referencedColumns": [
+              "rangerId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "patrol_logs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` TEXT NOT NULL, `remoteId` TEXT, `rangerId` TEXT NOT NULL, `authorName` TEXT, `title` TEXT, `notes` TEXT, `timestamp` INTEGER NOT NULL, `audioPath` TEXT, `videoPath` TEXT, `syncStatus` TEXT, `lastSyncAttempt` INTEGER NOT NULL, `lastModifiedAt` INTEGER NOT NULL, PRIMARY KEY(`localId`), FOREIGN KEY(`rangerId`) REFERENCES `rangers`(`rangerId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remoteId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rangerId",
+            "columnName": "rangerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorName",
+            "columnName": "authorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "audioPath",
+            "columnName": "audioPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "videoPath",
+            "columnName": "videoPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "syncStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastSyncAttempt",
+            "columnName": "lastSyncAttempt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastModifiedAt",
+            "columnName": "lastModifiedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "localId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_patrol_logs_rangerId",
+            "unique": false,
+            "columnNames": [
+              "rangerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_patrol_logs_rangerId` ON `${TABLE_NAME}` (`rangerId`)"
+          },
+          {
+            "name": "index_patrol_logs_remoteId",
+            "unique": true,
+            "columnNames": [
+              "remoteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_patrol_logs_remoteId` ON `${TABLE_NAME}` (`remoteId`)"
+          },
+          {
+            "name": "index_patrol_logs_rangerId_timestamp",
+            "unique": false,
+            "columnNames": [
+              "rangerId",
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_patrol_logs_rangerId_timestamp` ON `${TABLE_NAME}` (`rangerId`, `timestamp`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "rangers",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "rangerId"
+            ],
+            "referencedColumns": [
+              "rangerId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "health_observations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` TEXT NOT NULL, `remoteId` TEXT, `rangerId` TEXT NOT NULL, `authorName` TEXT, `title` TEXT, `notes` TEXT, `timestamp` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `syncStatus` TEXT, `lastSyncAttempt` INTEGER NOT NULL, `lastModifiedAt` INTEGER NOT NULL, PRIMARY KEY(`localId`), FOREIGN KEY(`rangerId`) REFERENCES `rangers`(`rangerId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remoteId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rangerId",
+            "columnName": "rangerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorName",
+            "columnName": "authorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "syncStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastSyncAttempt",
+            "columnName": "lastSyncAttempt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastModifiedAt",
+            "columnName": "lastModifiedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "localId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_health_observations_rangerId",
+            "unique": false,
+            "columnNames": [
+              "rangerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_health_observations_rangerId` ON `${TABLE_NAME}` (`rangerId`)"
+          },
+          {
+            "name": "index_health_observations_remoteId",
+            "unique": true,
+            "columnNames": [
+              "remoteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_health_observations_remoteId` ON `${TABLE_NAME}` (`remoteId`)"
+          },
+          {
+            "name": "index_health_observations_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_health_observations_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "rangers",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "rangerId"
+            ],
+            "referencedColumns": [
+              "rangerId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "app_notifications",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`notificationId` TEXT NOT NULL, `rangerId` TEXT NOT NULL, `actorUserId` TEXT, `actorName` TEXT, `recordId` TEXT, `recordType` TEXT, `title` TEXT, `message` TEXT, `createdAt` INTEGER NOT NULL, `isRead` INTEGER NOT NULL, `destination` TEXT, `systemNotified` INTEGER NOT NULL, PRIMARY KEY(`notificationId`), FOREIGN KEY(`rangerId`) REFERENCES `rangers`(`rangerId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "notificationId",
+            "columnName": "notificationId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rangerId",
+            "columnName": "rangerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actorUserId",
+            "columnName": "actorUserId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "actorName",
+            "columnName": "actorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "recordId",
+            "columnName": "recordId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "recordType",
+            "columnName": "recordType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRead",
+            "columnName": "isRead",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destination",
+            "columnName": "destination",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "systemNotified",
+            "columnName": "systemNotified",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "notificationId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_app_notifications_rangerId",
+            "unique": false,
+            "columnNames": [
+              "rangerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_app_notifications_rangerId` ON `${TABLE_NAME}` (`rangerId`)"
+          },
+          {
+            "name": "index_app_notifications_rangerId_recordId_recordType",
+            "unique": true,
+            "columnNames": [
+              "rangerId",
+              "recordId",
+              "recordType"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_app_notifications_rangerId_recordId_recordType` ON `${TABLE_NAME}` (`rangerId`, `recordId`, `recordType`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "rangers",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "rangerId"
+            ],
+            "referencedColumns": [
+              "rangerId"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3f2e38ad485b7e77e7312c2b4fc2b705')"
+    ]
+  }
+}

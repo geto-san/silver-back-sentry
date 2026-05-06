@@ -6,6 +6,9 @@ import android.text.TextUtils;
 import android.util.Patterns;
 import android.widget.Toast;
 
+// Account switcher
+import com.sbs.data.AccountSlotManager;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
@@ -30,9 +33,54 @@ import com.sbs.databinding.ActivityLoginBinding;
 import com.sbs.notifications.FcmTokenManager;
 
 public class LoginActivity extends BaseActivity {
+
+    // ── Intent contract for multi-account flows ───────────────────────────────
+
+    /**
+     * Extra key that tells LoginActivity why it was launched.
+     * Values: MODE_NORMAL (default), MODE_ADD_SECOND, MODE_SWITCH.
+     */
+    public static final String EXTRA_MODE = "login_mode";
+
+    /**
+     * Normal login — no special behaviour after authentication.
+     * This is the default when the extra is absent.
+     */
+    public static final String MODE_NORMAL = "normal";
+
+    /**
+     * Add-second-account mode.
+     * The ranger is adding a second Firebase account to the device while a
+     * first account is already registered in AccountSlotManager slot 1.
+     * After a successful login AccountSlotManager.registerCurrentUser() assigns
+     * the new UID to slot 2 automatically.
+     * No sign-out is performed before this flow — Firebase switches the session
+     * when the second set of credentials is submitted.
+     */
+    public static final String MODE_ADD_SECOND = "add_second";
+
+    /**
+     * Account-switch mode.
+     * The caller (DashboardActivity.confirmAndSwitch) has already signed out of
+     * Firebase Auth before starting LoginActivity in this mode.
+     * The ranger's target account email is pre-filled in the email field so
+     * they only need to enter their password.
+     */
+    public static final String MODE_SWITCH = "switch";
+
+    /**
+     * Optional email address to pre-fill in the email field.
+     * Used together with MODE_SWITCH so the ranger only needs to enter
+     * their password for the target account.
+     */
+    public static final String EXTRA_PREFILL_EMAIL = "prefill_email";
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     private ActivityLoginBinding binding;
     private FirebaseAuth auth;
     private GoogleSignInClient googleSignInClient;
+    private String loginMode = MODE_NORMAL;
     private final ActivityResultLauncher<Intent> googleLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getData() == null) {
@@ -53,13 +101,32 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         applyWindowInsets(binding.getRoot());
 
         auth = FirebaseAuth.getInstance();
+
+        // ── Read launch mode ──────────────────────────────────────────────────
+        loginMode = getIntent().getStringExtra(EXTRA_MODE);
+        if (loginMode == null) loginMode = MODE_NORMAL;
+
+        // ── Pre-fill email when switching accounts ────────────────────────────
+        // When launched in MODE_SWITCH, DashboardActivity passes the target
+        // account's email address so the ranger only needs to enter their
+        // password. The email field is made non-editable so there is no
+        // confusion about which account is being authenticated.
+        String prefillEmail = getIntent().getStringExtra(EXTRA_PREFILL_EMAIL);
+        if (MODE_SWITCH.equals(loginMode) && !TextUtils.isEmpty(prefillEmail)) {
+            binding.etUsername.setText(prefillEmail);
+            binding.etUsername.setSelection(prefillEmail.length()); // cursor at end
+            // Hint the ranger they're switching, not logging in fresh
+            binding.btnGetStarted.setText("Switch Account");
+        } else if (MODE_ADD_SECOND.equals(loginMode)) {
+            binding.btnGetStarted.setText("Add Account");
+        }
 
         binding.btnGetStarted.setOnClickListener(v -> attemptLogin());
         binding.tvCreateAccount.setOnClickListener(v ->
@@ -102,11 +169,25 @@ public class LoginActivity extends BaseActivity {
                     binding.btnGetStarted.setEnabled(true);
 
                     if (task.isSuccessful()) {
+                        // ── Register this user in the correct account slot ────────
+                        // Must be called before navigating to DashboardActivity so
+                        // that the account chip row is populated when the drawer
+                        // first opens.
+                        AccountSlotManager.getInstance(this)
+                                .registerCurrentUser(auth.getCurrentUser());
+
                         AppRepository.getInstance(this).upsertCurrentRanger();
                         SyncScheduler.scheduleConfiguredSync(this);
                         RealtimeSyncManager.getInstance(this).start();
-                        Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
                         FcmTokenManager.syncCurrentToken(this);
+
+                        String welcome = MODE_SWITCH.equals(loginMode)
+                                ? "Switched account!"
+                                : MODE_ADD_SECOND.equals(loginMode)
+                                        ? "Second account added!"
+                                        : "Welcome back!";
+                        Toast.makeText(this, welcome, Toast.LENGTH_SHORT).show();
+
                         Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
@@ -142,10 +223,21 @@ public class LoginActivity extends BaseActivity {
                         if (user != null) {
                             upsertUserProfile(user);
                         }
+
+                        // ── Register this user in the correct account slot ────────
+                        AccountSlotManager.getInstance(this)
+                                .registerCurrentUser(auth.getCurrentUser());
+
                         AppRepository.getInstance(this).upsertCurrentRanger();
                         SyncScheduler.scheduleConfiguredSync(this);
                         RealtimeSyncManager.getInstance(this).start();
                         FcmTokenManager.syncCurrentToken(this);
+
+                        String welcome = MODE_ADD_SECOND.equals(loginMode)
+                                ? "Second account added!"
+                                : "Welcome back!";
+                        Toast.makeText(this, welcome, Toast.LENGTH_SHORT).show();
+
                         Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
