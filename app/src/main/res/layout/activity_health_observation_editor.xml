@@ -28,39 +28,114 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- ── Title ──────────────────────────────────────────────────── -->
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/health_title">
+                android:hint="@string/health_title"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etHealthTitle"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ── Notes ─────────────────────────────────────────────────── -->
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="@string/health_notes">
+                android:hint="@string/health_notes"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etHealthNotes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="top"
-                    android:inputType="textMultiLine"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine|textCapSentences"
                     android:minLines="5" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ── Location section ──────────────────────────────────────── -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Location"
+                android:textColor="?attr/primaryTextColor"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="32dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="10dp"
+                android:background="?attr/colorSecondary" />
+
+            <!--
+                Pick-on-Map button.
+                Launches LocationPickerActivity for result.
+                On RESULT_OK the activity reads RESULT_LAT / RESULT_LNG
+                from the returned Intent via locationPickerLauncher.
+            -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPickLocation"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Pick Location on Map"
+                android:textColor="?attr/primaryTextColor"
+                app:icon="@android:drawable/ic_menu_mylocation"
+                app:iconTint="?attr/colorSecondary"
+                app:strokeColor="?attr/colorSecondary" />
+
+            <!--
+                Live coordinate feedback label.
+                Shows "No location selected" until the ranger confirms a pin.
+                Updated by HealthObservationEditorActivity.updateLocationLabel().
+            -->
+            <TextView
+                android:id="@+id/tvLocationLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:text="No location selected"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="13sp"
+                android:visibility="visible" />
+
+            <!-- ── Divider ─────────────────────────────────────────────── -->
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"
+                android:background="?attr/dividerColor" />
+
+            <!-- ── Save button ────────────────────────────────────────── -->
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveHealthObservation"
                 style="@style/InstagramButton"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="24dp"
-                android:text="@string/save_health_observation" />
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/save_health_observation"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

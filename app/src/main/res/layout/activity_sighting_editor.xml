@@ -28,96 +28,203 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- ── Title ─────────────────────────────────────────────────── -->
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/sighting_title">
+                android:hint="@string/sighting_title"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSightingTitle"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ── Notes / Description ───────────────────────────────────── -->
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Description / Notes">
+                android:hint="Description / Notes"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etNotes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="top"
-                    android:inputType="textMultiLine"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine|textCapSentences"
                     android:minLines="3" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ── Radius ────────────────────────────────────────────────── -->
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Radius (meters)">
+                android:hint="Estimated radius (meters)"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etRadius"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal" />
+                    android:inputType="numberDecimal"
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ── Location section ──────────────────────────────────────── -->
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/media"
-                android:textStyle="bold"
-                android:textColor="?attr/primaryTextColor" />
+                android:layout_marginTop="20dp"
+                android:text="Location"
+                android:textColor="?attr/primaryTextColor"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
+            <View
+                android:layout_width="32dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="10dp"
+                android:background="?attr/colorSecondary" />
+
+            <!--
+                Pick-on-Map button — opens LocationPickerActivity for result.
+                The activity returns RESULT_LAT and RESULT_LNG which are
+                captured in SightingEditorActivity.locationPickerLauncher.
+            -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPickLocation"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Pick Location on Map"
+                android:textColor="?attr/primaryTextColor"
+                app:icon="@android:drawable/ic_menu_mylocation"
+                app:iconTint="?attr/colorSecondary"
+                app:strokeColor="?attr/colorSecondary" />
+
+            <!--
+                Live coordinate label — hidden until the ranger picks a location.
+                Updated in SightingEditorActivity.updateLocationLabel().
+                Shows "📍 lat, lng" after a pin is confirmed, or
+                "No location selected" as the initial state.
+            -->
+            <TextView
+                android:id="@+id/tvLocationLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:drawablePadding="6dp"
+                android:gravity="center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:text="No location selected"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="13sp"
+                android:visibility="visible" />
+
+            <!-- ── Media section ─────────────────────────────────────────── -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/media"
+                android:textColor="?attr/primaryTextColor"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="32dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="10dp"
+                android:background="?attr/colorSecondary" />
+
+            <!--
+                Photo + Video in a row.
+                These are intentional stubs — wire up ACTION_IMAGE_CAPTURE /
+                CameraX when the feature is built out.
+            -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCapturePhoto"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="Photo"
-                    app:icon="@android:drawable/ic_menu_camera" />
+                    android:layout_marginEnd="6dp"
+                    android:text="@string/photo"
+                    app:icon="@android:drawable/ic_menu_camera"
+                    app:iconTint="?attr/iconTintColor"
+                    app:strokeColor="?attr/dividerColor" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRecordVideo"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="Video"
-                    app:icon="@android:drawable/presence_video_online" />
+                    android:layout_marginStart="6dp"
+                    android:text="@string/video"
+                    app:icon="@android:drawable/presence_video_online"
+                    app:iconTint="?attr/iconTintColor"
+                    app:strokeColor="?attr/dividerColor" />
+
             </LinearLayout>
 
-            <Button
+            <!-- Audio recording stub -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRecordAudio"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Audio Recording / Alternative"
-                app:icon="@android:drawable/ic_btn_speak_now" />
+                android:text="@string/audio"
+                app:icon="@android:drawable/ic_btn_speak_now"
+                app:iconTint="?attr/iconTintColor"
+                app:strokeColor="?attr/dividerColor" />
 
+            <!-- ── Divider ─────────────────────────────────────────────── -->
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"
+                android:background="?attr/dividerColor" />
+
+            <!-- ── Save button ────────────────────────────────────────── -->
+
+            <!--
+                Uses the app's InstagramButton style (filled, full-width).
+                Disabled in SightingEditorActivity.saveSighting() while the
+                save operation is in progress to prevent double-submission.
+            -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveSighting"
                 style="@style/InstagramButton"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="32dp"
-                android:text="@string/save_sighting" />
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/save_sighting"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

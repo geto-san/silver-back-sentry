@@ -149,7 +149,7 @@ public final class PatrolLogStore {
             obj.put("title", record.title);
             obj.put("notes", record.notes);
             obj.put("timestamp", record.timestamp);
-            obj.put("authorId", record.authorId);
+//            obj.put("authorId", record.authorId);
             obj.put("authorName", record.authorName);
             obj.put("syncStatus", record.syncStatus);
             obj.put("audioPath", record.audioPath);

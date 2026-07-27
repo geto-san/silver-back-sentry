@@ -2,17 +2,66 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- ── Hardware feature declarations ──────────────────────────────────── -->
+    <!-- required=false means the app can be installed on devices without a    -->
+    <!-- camera, but camera-dependent features will be disabled at runtime.    -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
+    <!-- ── Permissions ────────────────────────────────────────────────────── -->
+
+    <!-- Network -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+
+    <!-- Location — ACCESS_FINE_LOCATION is required for GPS sighting coordinates -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Camera — required for photo evidence capture -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Microphone — required for audio-note recording -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Notifications — POST_NOTIFICATIONS is required on Android 13+ (API 33) -->
+    <!-- for both FCM display and WorkManager foreground-service notifications.  -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- WorkManager foreground service — required when WorkManager runs          -->
+    <!-- expedited work (setExpedited) on Android 12+ or when a sync notification -->
+    <!-- must be shown while the app is in the background.                         -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Required on Android 14+ (API 34) for foreground services that access    -->
+    <!-- a data-sync network connection.                                           -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!-- Battery — read battery status for the hardware diagnostic screen and     -->
+    <!-- the manual battery-check fallback in UploadPendingDataWorker.            -->
+    <!-- Note: WorkManager's setRequiresBatteryNotLow() constraint does NOT       -->
+    <!-- require this permission; only direct BatteryManager reads do.            -->
+    <uses-permission android:name="android.permission.BATTERY_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- Read phone state — required for TelephonyManager.getPhoneType() used    -->
+    <!-- by HardwareStatusLiveData to detect cellular radio availability.         -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- External storage — needed only if media files are saved to shared        -->
+    <!-- storage (currently all media uses app-private filesDir).                 -->
+    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+         android:maxSdkVersion="28" /> -->
+
+    <!-- ── Application ───────────────────────────────────────────────────── -->
     <application
         android:name=".app.SbsApplication"
         android:allowBackup="true"
@@ -24,45 +73,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sbs">
 
-        <activity
-            android:name=".ui.DashboardActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.SightingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.SightingEditorActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.PatrolLogsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.PatrolLogEditorActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.HealthObservationsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.HealthObservationEditorActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.NotificationsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.RecordDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.DeviceInfoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.SignUpActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.WelcomeActivity"
-            android:exported="false" />
+        <!-- ── Launcher / splash ─────────────────────────────────────────── -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -73,6 +84,96 @@
             </intent-filter>
         </activity>
 
+        <!-- ── Auth screens ──────────────────────────────────────────────── -->
+        <activity
+            android:name=".ui.WelcomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.LoginActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.SignUpActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ── Core screens ───────────────────────────────────────────────── -->
+
+        <!--
+            DashboardActivity — main screen after login.
+            singleTop: prevents multiple instances when the user taps a
+            notification that deep-links back to the dashboard.
+        -->
+        <activity
+            android:name=".ui.DashboardActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+
+
+        <!--
+            LocationPickerActivity — Feature 4: map-based coordinate picker.
+            Launched by SightingEditorActivity and HealthObservationEditorActivity
+            for result (RESULT_LAT / RESULT_LNG).
+            Long-press to drop a pin, confirm to return coordinates.
+        -->
+        <activity
+            android:name=".ui.LocationPickerActivity"
+            android:exported="false"
+            android:label="Pick Location" />
+
+        <!-- ── Record screens ──────────────────────────────────────────────── -->
+        <activity
+            android:name=".ui.SightingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.SightingEditorActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.PatrolLogsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.PatrolLogEditorActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.HealthObservationsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.HealthObservationEditorActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- ── Utility screens ────────────────────────────────────────────── -->
+        <activity
+            android:name=".ui.NotificationsActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".ui.RecordDetailActivity"
+            android:exported="false" />
+
+        <!--
+            DeviceInfoActivity — Feature 1: Hardware Diagnostic Utility.
+            Now backed by DeviceInfoViewModel + HardwareStatusLiveData.
+            All hardware rows update live via BroadcastReceiver events.
+        -->
+        <activity
+            android:name=".ui.DeviceInfoActivity"
+            android:exported="false"
+            android:label="Device Diagnostics" />
+
+        <!-- ── FCM Service ────────────────────────────────────────────────── -->
+        <!--
+            SbsFirebaseMessagingService — Feature 3: FCM integration.
+            Receives push messages even when the app is in the background.
+            Two message types handled:
+              • Data messages with type=sync → trigger WorkManager sync
+              • Data messages with type=alert → show system notification
+        -->
         <service
             android:name=".notifications.SbsFirebaseMessagingService"
             android:exported="false">
@@ -81,10 +182,24 @@
             </intent-filter>
         </service>
 
+        <!-- Default FCM notification icon shown in the status bar -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification" />
 
+        <!-- Default FCM notification channel ID (Android 8+).              -->
+        <!-- This channel is created in AppNotificationHelper.ensureChannel. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="sbs_shared_updates" />
+
+        <!-- ── FileProvider ───────────────────────────────────────────────── -->
+        <!--
+            FileProvider exposes app-private files (photos, audio, video) to
+            the camera and media-picker apps via content:// URIs.
+            The authority must match the one used in RangerFileManager /
+            FileProvider.getUriForFile() calls.
+        -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -94,6 +209,26 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- ── WorkManager initialiser ────────────────────────────────────── -->
+        <!--
+            The default WorkManager startup initializer (androidx.startup) is
+            retained here. If you switch to a custom WorkerFactory (e.g. for
+            Hilt injection into Workers) you would remove the initializer entry
+            below and implement Configuration.Provider in SbsApplication:
+
+            <provider
+                android:name="androidx.startup.InitializationProvider"
+                ...>
+                <meta-data
+                    android:name="androidx.work.WorkManagerInitializer"
+                    android:value="androidx.startup.InitializationProvider"
+                    tools:node="remove" />
+            </provider>
+
+            For the current architecture (EntryPoint-based Worker injection)
+            the default initializer is correct — no change needed.
+        -->
 
     </application>
 

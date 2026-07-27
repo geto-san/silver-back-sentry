@@ -7,14 +7,16 @@
     android:layout_height="match_parent"
     tools:context=".ui.DashboardActivity">
 
-    <!-- Main content area -->
+    <!-- ══════════════════════════════════════════════════════════════════════
+         MAIN CONTENT AREA
+         ══════════════════════════════════════════════════════════════════════ -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/screenBackground">
 
-        <!-- Top bar -->
+        <!-- ── Toolbar ─────────────────────────────────────────────────────── -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -27,6 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <!-- Hamburger menu -->
                 <ImageButton
                     android:id="@+id/btnMenuToggle"
                     android:layout_width="48dp"
@@ -40,41 +43,28 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="?attr/iconTintColor" />
 
+                <!-- App title -->
                 <TextView
                     android:id="@+id/tvDashboardTitle"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:fontFamily="cursive"
                     android:text="@string/silver_back_sentry"
                     android:textColor="?attr/primaryTextColor"
-                    android:textSize="24sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/btnMenuToggle"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Network Status Overlay Label -->
-                <TextView
-                    android:id="@+id/tvNetworkStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_network_status_overlay"
-                    android:elevation="2dp"
-                    android:paddingStart="12dp"
-                    android:paddingTop="4dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="4dp"
-                    android:text="@string/network_online"
-                    android:textColor="@android:color/white"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/btnThemeMode"
-                    app:layout_constraintStart_toEndOf="@id/tvDashboardTitle"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <!--
+                    Task 5: Updated icon — theme toggle now uses ic_theme_sun
+                    (sun icon for Light / Dark / System theme picker).
+                -->
                 <ImageButton
                     android:id="@+id/btnThemeMode"
                     android:layout_width="48dp"
@@ -83,12 +73,16 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/appearance"
                     android:padding="12dp"
-                    android:src="@android:drawable/ic_menu_manage"
+                    android:src="@drawable/ic_theme_sun"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/notificationContainer"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="?attr/iconTintColor" />
 
+                <!--
+                    Task 5: Updated icon — notification bell now uses ic_bell_tinted
+                    (Instagram-style outline bell, tintable via iconTintColor).
+                -->
                 <FrameLayout
                     android:id="@+id/notificationContainer"
                     android:layout_width="48dp"
@@ -105,7 +99,7 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/notifications"
                         android:padding="12dp"
-                        android:src="@android:drawable/ic_popup_reminder"
+                        android:src="@drawable/ic_bell_tinted"
                         app:tint="?attr/iconTintColor" />
 
                     <View
@@ -117,11 +111,13 @@
                         android:layout_marginEnd="10dp"
                         android:background="@drawable/bg_notification_dot"
                         android:visibility="gone" />
+
                 </FrameLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.Toolbar>
 
+        <!-- Toolbar bottom edge rule -->
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
@@ -129,8 +125,38 @@
             android:background="?attr/dividerColor"
             app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
-        <!-- osmdroid MapView -->
-        <org.osmdroid.views.MapView
+        <!--
+            Task 6: Network Status Banner
+            MOVED from inside the Toolbar to a full-width overlay strip that
+            sits immediately below the toolbar divider, directly overlaying the
+            top edge of the MapView.  This position:
+              • Never obstructs the menu toggle, title, or toolbar buttons.
+              • Is always visible even when the map is in satellite mode.
+              • Takes full width so it reads as a system-level alert, not a chip.
+            Background adapts via bg_network_status_overlay drawable (red=offline,
+            orange=airplane).  The view is GONE when the ranger is online.
+        -->
+        <TextView
+            android:id="@+id/tvNetworkStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_network_status_overlay"
+            android:elevation="6dp"
+            android:gravity="center"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
+            android:text="@string/network_offline"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.04"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider" />
+
+        <!-- MapLibre MapView — fills the area below toolbar -->
+        <org.maplibre.android.maps.MapView
             android:id="@+id/mapView"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -139,6 +165,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/divider" />
 
+        <!-- Scrim overlay for the action menu (darkens the map behind the popup) -->
         <View
             android:id="@+id/actionMenuScrim"
             android:layout_width="0dp"
@@ -150,16 +177,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!--
+            Task 7: Redesigned action popup for the "New Record" FAB.
+            Three visually distinct options replace the old 2-item menu:
+              1. New Sighting        (blue badge, binoculars icon)
+              2. New Patrol Log      (green badge, clipboard icon)
+              3. New Health Obs.     (purple badge, heart icon)
+            "Center on My Location" is REMOVED from this popup (Task 8);
+            it now lives on its own dedicated FAB (btnMyLocation).
+        -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/actionMenuContainer"
-            android:layout_width="260dp"
+            android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="92dp"
+            android:layout_marginBottom="80dp"
             android:visibility="gone"
             app:cardBackgroundColor="?attr/surfaceBackground"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="12dp"
             app:strokeColor="?attr/dividerColor"
             app:strokeWidth="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -168,81 +204,351 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Popup header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/quick_actions"
-                    android:textColor="?attr/primaryTextColor"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:orientation="vertical"
+                    android:paddingStart="20dp"
+                    android:paddingTop="16dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="12dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/quick_actions_hint"
-                    android:textColor="?attr/secondaryTextColor"
-                    android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/new_record"
+                        android:textColor="?attr/primaryTextColor"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Select the type of record to create"
+                        android:textColor="?attr/secondaryTextColor"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="8dp"
                     android:background="?attr/dividerColor" />
 
-                <com.google.android.material.button.MaterialButton
+                <!-- ── Option 1: New Sighting ─────────────────────────────── -->
+                <LinearLayout
                     android:id="@+id/actionSighting"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:text="@string/record_new_sighting"
-                    android:textColor="?attr/primaryTextColor"
-                    app:icon="@android:drawable/ic_menu_add"
-                    app:iconGravity="textStart"
-                    app:iconTint="?attr/iconTintColor" />
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="14dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/actionCenterMap"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    <!-- Blue icon badge -->
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp">
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_notification_dot"
+                            android:backgroundTint="#1A0095F6" />
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_eye"
+                            app:tint="#0095F6" />
+                    </FrameLayout>
+
+                    <!-- Label column -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/new_sighting_action"
+                            android:textColor="?attr/primaryTextColor"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Log a gorilla sighting"
+                            android:textColor="?attr/secondaryTextColor"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@android:drawable/ic_media_next"
+                        app:tint="?attr/secondaryTextColor" />
+
+                </LinearLayout>
+
+                <View
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="4dp"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:text="@string/center_on_my_location"
-                    android:textColor="?attr/primaryTextColor"
-                    app:icon="@android:drawable/ic_menu_mylocation"
-                    app:iconGravity="textStart"
-                    app:iconTint="?attr/iconTintColor" />
+                    android:layout_height="1dp"
+                    android:layout_marginStart="20dp"
+                    android:background="?attr/dividerColor" />
+
+                <!-- ── Option 2: New Patrol Log ───────────────────────────── -->
+                <LinearLayout
+                    android:id="@+id/actionPatrolLog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="14dp">
+
+                    <!-- Green icon badge -->
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp">
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_notification_dot"
+                            android:backgroundTint="#1A4CAF50" />
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_clipboard"
+                            app:tint="#388E3C" />
+                    </FrameLayout>
+
+                    <!-- Label column -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/new_patrol_log_action"
+                            android:textColor="?attr/primaryTextColor"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Record a patrol observation"
+                            android:textColor="?attr/secondaryTextColor"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@android:drawable/ic_media_next"
+                        app:tint="?attr/secondaryTextColor" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="20dp"
+                    android:background="?attr/dividerColor" />
+
+                <!-- ── Option 3: New Health Observation ───────────────────── -->
+                <LinearLayout
+                    android:id="@+id/actionHealthObservation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="14dp">
+
+                    <!-- Purple icon badge -->
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp">
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_notification_dot"
+                            android:backgroundTint="#1A9C27B0" />
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_heart"
+                            app:tint="#7B1FA2" />
+                    </FrameLayout>
+
+                    <!-- Label column -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/new_health_observation_action"
+                            android:textColor="?attr/primaryTextColor"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Log health status of a gorilla"
+                            android:textColor="?attr/secondaryTextColor"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@android:drawable/ic_media_next"
+                        app:tint="?attr/secondaryTextColor" />
+
+                </LinearLayout>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!--
+            Task 4: Map style toggle chip (bottom-start).
+            Tap to switch between Street view (OpenFreeMap Liberty) and
+            Satellite view (Esri World Imagery — free, no API key needed).
+            The label shows which mode you will SWITCH TO (not current mode).
+        -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btnMapStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="?attr/surfaceBackground"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:strokeColor="?attr/dividerColor"
+            app:strokeWidth="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_map_pin"
+                    app:tint="?attr/iconTintColor" />
+
+                <TextView
+                    android:id="@+id/tvMapStyleLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/map_satellite_view"
+                    android:textColor="?attr/primaryTextColor"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!--
+            Task 8: NEW "My Location" mini FAB.
+            Placed immediately ABOVE the "New Record" FAB.
+            Clicking this FAB directly centres the map on the ranger's GPS
+            position — no popup, immediate action.
+            The "Centre on My Location" option has been REMOVED from the
+            "New Record" popup (Task 8).
+        -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnMyLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="18dp"
+            android:layout_marginBottom="12dp"
+            android:contentDescription="@string/my_location"
+            android:src="@drawable/ic_crosshair"
+            app:backgroundTint="?attr/surfaceBackground"
+            app:fabSize="mini"
+            app:tint="?attr/iconTintColor"
+            app:layout_constraintBottom_toTopOf="@id/btnNewRecord"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!--
+            Task 7 & 8: "New Record" main FAB (renamed from the old "My Location" FAB).
+            Clicking this opens the redesigned 3-option action popup
+            (New Sighting / New Patrol Log / New Health Observation).
+            The "+" icon is replaced with ic_add_record (clean white plus).
+        -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnNewRecord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="24dp"
-            android:contentDescription="@string/my_location"
-            android:src="@android:drawable/ic_input_add"
-            app:backgroundTint="?attr/screenBackground"
+            android:contentDescription="@string/new_record"
+            android:src="@drawable/ic_add_record"
+            app:backgroundTint="?attr/colorSecondary"
+            app:tint="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:tint="?attr/iconTintColor" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- menu panel (Navigation Drawer) -->
+    <!-- ══════════════════════════════════════════════════════════════════════
+         NAVIGATION DRAWER (side panel)
+         Width: 300 dp, slides in from the start edge.
+         Structure:
+           1. accountHeader  — WhatsApp-style account switcher
+                 a. Close button row
+                 b. Large active-account avatar + name + email
+                 c. Thin section divider
+                 d. Account chip row  (Slot 1 · Slot 2 · Add)
+           2. ScrollView     — menu items (Sightings, Health, Patrol, Map, Device)
+           3. Footer         — simplified Log Out row
+         ══════════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/sidePanel"
         android:layout_width="300dp"
@@ -251,32 +557,273 @@
         android:background="?attr/menuBackground"
         android:clickable="true"
         android:focusable="true"
-        android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="12dp">
+        android:orientation="vertical">
 
-        <!-- Top close action -->
+        <!-- ── Account header ─────────────────────────────────────────────── -->
         <LinearLayout
+            android:id="@+id/accountHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end|center_vertical"
-            android:paddingStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="8dp">
+            android:background="?attr/toolbarBackground"
+            android:orientation="vertical"
+            android:paddingBottom="4dp"
+            android:elevation="2dp">
 
-            <ImageButton
-                android:id="@+id/btnMenuClose"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/close_menu"
-                android:padding="8dp"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
-                app:tint="?attr/menuIconTint" />
+            <!-- Close row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end|center_vertical"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp">
+
+                <ImageButton
+                    android:id="@+id/btnMenuClose"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/close_menu"
+                    android:padding="8dp"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    app:tint="?attr/menuIconTint" />
+            </LinearLayout>
+
+            <!-- Active account info row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="16dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivUserAvatar"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/bg_dashboard_avatar"
+                    android:contentDescription="@string/profile"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CircularAvatar" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvUserName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="Ranger"
+                        android:textColor="?attr/menuTextColor"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvActiveEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:textColor="?attr/menuSecondaryTextColor"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:background="?attr/menuDividerColor" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="10dp"
+                android:letterSpacing="0.10"
+                android:text="@string/accounts"
+                android:textAllCaps="true"
+                android:textColor="?attr/menuSecondaryTextColor"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <!-- Account chip row -->
+            <LinearLayout
+                android:id="@+id/accountChipsRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="18dp">
+
+                <!-- Slot 1 chip -->
+                <LinearLayout
+                    android:id="@+id/accountChip1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:longClickable="true"
+                    android:orientation="vertical"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:visibility="gone">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/chipCard1"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardCornerRadius="30dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/ig_blue"
+                        app:strokeWidth="3dp">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/ivSlot1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/bg_dashboard_avatar"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CircularAvatar" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:id="@+id/tvSlot1Name"
+                        android:layout_width="64dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/account_active_label"
+                        android:textColor="?attr/menuSecondaryTextColor"
+                        android:textSize="10sp" />
+
+                </LinearLayout>
+
+                <!-- Slot 2 chip -->
+                <LinearLayout
+                    android:id="@+id/accountChip2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:longClickable="true"
+                    android:orientation="vertical"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:visibility="gone">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/chipCard2"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardCornerRadius="30dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/sbs_input_stroke"
+                        app:strokeWidth="1.5dp">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/ivSlot2"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/bg_dashboard_avatar"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CircularAvatar" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:id="@+id/tvSlot2Name"
+                        android:layout_width="64dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="Switch"
+                        android:textColor="?attr/menuSecondaryTextColor"
+                        android:textSize="10sp" />
+
+                </LinearLayout>
+
+                <!-- Add account chip -->
+                <LinearLayout
+                    android:id="@+id/accountChipAdd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:visibility="visible">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/chipCardAdd"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        app:cardBackgroundColor="?attr/surfaceBackground"
+                        app:cardCornerRadius="30dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/sbs_input_stroke"
+                        app:strokeWidth="1.5dp">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="center"
+                            android:src="@android:drawable/ic_input_add"
+                            app:tint="?attr/menuIconTint" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="64dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/account_add_label"
+                        android:textColor="?attr/menuSecondaryTextColor"
+                        android:textSize="10sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
         </LinearLayout>
 
-        <!-- Scrollable menu list -->
+        <!-- ── Scrollable menu items ───────────────────────────────────────── -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -309,13 +856,11 @@
                     <FrameLayout
                         android:layout_width="32dp"
                         android:layout_height="32dp">
-
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
-                            android:alpha="0.92"
-                            android:src="@android:drawable/ic_menu_add"
+                            android:src="@drawable/ic_eye"
                             app:tint="?attr/menuIconTint" />
                     </FrameLayout>
 
@@ -331,7 +876,7 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- PATROL LOGS -->
+                <!-- HEALTH OBSERVATIONS -->
                 <LinearLayout
                     android:id="@+id/menuHealthObservations"
                     android:layout_width="match_parent"
@@ -348,13 +893,11 @@
                     <FrameLayout
                         android:layout_width="32dp"
                         android:layout_height="32dp">
-
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
-                            android:alpha="0.92"
-                            android:src="@android:drawable/ic_menu_info_details"
+                            android:src="@drawable/ic_heart"
                             app:tint="?attr/menuIconTint" />
                     </FrameLayout>
 
@@ -387,13 +930,11 @@
                     <FrameLayout
                         android:layout_width="32dp"
                         android:layout_height="32dp">
-
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
-                            android:alpha="0.92"
-                            android:src="@android:drawable/ic_menu_view"
+                            android:src="@drawable/ic_clipboard"
                             app:tint="?attr/menuIconTint" />
                     </FrameLayout>
 
@@ -408,6 +949,43 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
+
+                <!-- MAP -->
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/menuMap"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:minHeight="60dp"-->
+<!--                    android:background="?attr/selectableItemBackground"-->
+<!--                    android:clickable="true"-->
+<!--                    android:focusable="true"-->
+<!--                    android:gravity="center_vertical"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:paddingStart="24dp"-->
+<!--                    android:paddingEnd="24dp">-->
+
+<!--                    <FrameLayout-->
+<!--                        android:layout_width="32dp"-->
+<!--                        android:layout_height="32dp">-->
+<!--                        <ImageView-->
+<!--                            android:layout_width="22dp"-->
+<!--                            android:layout_height="22dp"-->
+<!--                            android:layout_gravity="center"-->
+<!--                            android:src="@drawable/ic_map_pin"-->
+<!--                            app:tint="?attr/menuIconTint" />-->
+<!--                    </FrameLayout>-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginStart="24dp"-->
+<!--                        android:includeFontPadding="false"-->
+<!--                        android:letterSpacing="0.06"-->
+<!--                        android:text="@string/account_slot_map"-->
+<!--                        android:textColor="?attr/menuTextColor"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textStyle="bold" />-->
+<!--                </LinearLayout>-->
 
                 <!-- DEVICE INFO -->
                 <LinearLayout
@@ -426,13 +1004,11 @@
                     <FrameLayout
                         android:layout_width="32dp"
                         android:layout_height="32dp">
-
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
-                            android:alpha="0.92"
-                            android:src="@android:drawable/ic_menu_info_details"
+                            android:src="@drawable/ic_smartphone"
                             app:tint="?attr/menuIconTint" />
                     </FrameLayout>
 
@@ -451,7 +1027,7 @@
             </LinearLayout>
         </ScrollView>
 
-        <!-- Footer, styled like the reference image -->
+        <!-- ── Footer: simplified Log Out ────────────────────────────────── -->
         <LinearLayout
             android:id="@+id/tvLogout"
             android:layout_width="match_parent"
@@ -461,58 +1037,39 @@
             android:focusable="true"
             android:orientation="vertical"
             android:paddingStart="24dp"
-            android:paddingTop="12dp"
             android:paddingEnd="24dp"
             android:paddingBottom="20dp">
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="4dp"
                 android:background="?attr/menuDividerColor" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingTop="16dp">
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    app:tint="?attr/menuIconTint" />
+
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginStart="18dp"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.06"
+                    android:text="@string/log_out"
+                    android:textColor="?attr/menuTextColor"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="0.08"
-                        android:text="@string/log_out"
-                        android:textColor="?attr/menuTextColor"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvUserName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:includeFontPadding="false"
-                        android:text="@string/test_user_nim"
-                        android:textColor="?attr/menuSecondaryTextColor"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <!-- Replace src with your actual user/profile image -->
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivUserAvatar"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:contentDescription="@string/profile"
-                    android:scaleType="centerCrop"
-                    android:src="@android:drawable/sym_def_app_icon"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CircularAvatar" />
             </LinearLayout>
         </LinearLayout>
 

@@ -83,4 +83,42 @@
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
     <string name="earlier">Earlier</string>
+
+    <!-- ── Account Switcher ──────────────────────────────────────────────── -->
+    <string name="accounts">Accounts</string>
+    <string name="account_active_label">Active</string>
+    <string name="account_add_label">Add</string>
+    <string name="account_switch_title">Switch Account</string>
+    <string name="account_switch_message">Switch to %1$s?\n\nYou will need to enter your password to continue.</string>
+    <string name="account_switch_confirm">Switch</string>
+    <string name="account_remove_title">Remove Account</string>
+    <string name="account_remove_message">Remove %1$s from this device?</string>
+    <string name="account_remove_confirm">Remove</string>
+    <string name="account_removed">%1$s removed</string>
+    <string name="account_cannot_remove_active">Cannot remove the currently active account</string>
+    <string name="account_at_capacity">Only 2 ranger accounts are allowed on one device</string>
+    <string name="account_slot_map">MAP</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- ── Map view ─────────────────────────────────────────────────────────── -->
+    <string name="map_street_view">Street</string>
+    <string name="map_satellite_view">Satellite</string>
+    <string name="map_toggle_hint">Toggle map style</string>
+
+    <!-- ── New Record popup menu ─────────────────────────────────────────────── -->
+    <string name="new_record">New Record</string>
+    <string name="new_sighting_action">New Sighting</string>
+    <string name="new_patrol_log_action">New Patrol Log</string>
+    <string name="new_health_observation_action">New Health Observation</string>
+    <string name="center_my_location">Center on My Location</string>
+
+    <!-- ── Logout dialog ─────────────────────────────────────────────────────── -->
+    <string name="logout_title">Log Out?</string>
+    <string name="logout_message_single">You will be signed out of Silver Back Sentry.</string>
+    <string name="logout_message_switch">%1$s will be removed from this device. %2$s will become active.</string>
+    <string name="logout_confirm">Log Out</string>
+
+    <!-- ── Sign-in validation ────────────────────────────────────────────────── -->
+    <string name="error_gmail_only">Only Gmail accounts (@gmail.com) are supported</string>
+    <string name="switch_success">Switched to %1$s</string>
 </resources>

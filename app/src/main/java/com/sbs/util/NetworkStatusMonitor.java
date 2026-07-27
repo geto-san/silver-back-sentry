@@ -74,7 +74,7 @@ public class NetworkStatusMonitor {
             connectivityManager.unregisterNetworkCallback(networkCallback);
             context.unregisterReceiver(airplaneModeReceiver);
         } catch (Exception e) {
-            // Callback or receiver might not be registered
+            // when Callback or receiver is not registered
         }
     }
 
