@@ -1,4 +1,4 @@
-package com.sbs;
+package com.sbs.util;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -74,7 +74,7 @@ public class NetworkStatusMonitor {
             connectivityManager.unregisterNetworkCallback(networkCallback);
             context.unregisterReceiver(airplaneModeReceiver);
         } catch (Exception e) {
-            // Callback or receiver might not be registered
+            // when Callback or receiver is not registered
         }
     }
 

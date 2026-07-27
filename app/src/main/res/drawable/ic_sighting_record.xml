@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Binoculars icon — New Sighting option in action popup -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Left lens -->
+    <path
+        android:pathData="M3,9A4,4 0,1 0,3,17A4,4 0,0 0,3,9Z"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="1.8" />
+
+    <!-- Right lens -->
+    <path
+        android:pathData="M17,9A4,4 0,1 0,17,17A4,4 0,0 0,17,9Z"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="1.8" />
+
+    <!-- Bridge connecting the two lenses -->
+    <path
+        android:pathData="M7,13H10M14,13H17"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round" />
+
+    <!-- Top strap -->
+    <path
+        android:pathData="M7,9V7A2,2 0,0 1,9,5H15A2,2 0,0 1,17,7V9"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+</vector>

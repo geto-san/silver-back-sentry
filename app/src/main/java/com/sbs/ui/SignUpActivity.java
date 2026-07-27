@@ -6,6 +6,8 @@ import android.text.TextUtils;
 import android.util.Patterns;
 import android.widget.Toast;
 
+import com.sbs.data.AccountSlotManager;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
@@ -24,6 +26,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.sbs.R;
+import com.sbs.data.AppRepository;
+import com.sbs.data.RealtimeSyncManager;
+import com.sbs.data.SyncScheduler;
 import com.sbs.databinding.ActivitySignUpBinding;
 import com.sbs.notifications.FcmTokenManager;
 
@@ -98,6 +103,15 @@ public class SignUpActivity extends BaseActivity {
             return;
         }
 
+        // Task 1: Only Gmail accounts are supported.
+        // We validate the domain client-side; Firebase Auth will reject
+        // non-existent accounts when the ranger tries to sign in.
+        if (!email.toLowerCase().endsWith("@gmail.com")) {
+            binding.etEmail.setError(getString(R.string.error_gmail_only));
+            binding.etEmail.requestFocus();
+            return;
+        }
+
         if (TextUtils.isEmpty(password)) {
             binding.etPassword.setError("Password is required");
             binding.etPassword.requestFocus();
@@ -121,12 +135,18 @@ public class SignUpActivity extends BaseActivity {
                             return;
                         }
 
-                        String userId = auth.getCurrentUser().getUid();
+                        FirebaseUser signedInUser = auth.getCurrentUser();
+                        if (signedInUser == null) {
+                            binding.btnSignUp.setEnabled(true);
+                            Toast.makeText(this, "Sign up failed. Please try again.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        String userId = signedInUser.getUid();
                         UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
                                 .setDisplayName(fullName)
                                 .build();
 
-                        auth.getCurrentUser().updateProfile(profileUpdate)
+                        signedInUser.updateProfile(profileUpdate)
                                 .addOnCompleteListener(updateTask -> saveUserToFirestore(userId, fullName, email));
                     } else {
                         binding.btnSignUp.setEnabled(true);
@@ -145,6 +165,16 @@ public class SignUpActivity extends BaseActivity {
         db.collection("users").document(userId)
                 .set(user)
                 .addOnSuccessListener(aVoid -> {
+                    // Task 1 / Task 9: Register this user in the correct account slot
+                    // immediately after Firestore write so the drawer chip row is
+                    // populated the very first time the Dashboard opens.
+                    FirebaseUser newUser = auth.getCurrentUser();
+                    if (newUser != null) {
+                        AccountSlotManager.getInstance(this).registerCurrentUser(newUser);
+                    }
+                    AppRepository.getInstance(this).upsertCurrentRanger();
+                    SyncScheduler.scheduleConfiguredSync(this);
+                    RealtimeSyncManager.getInstance(this).start();
                     Toast.makeText(this, "Account created successfully", Toast.LENGTH_SHORT).show();
                     FcmTokenManager.syncCurrentToken(this);
                     navigateToDashboard();
@@ -183,9 +213,19 @@ public class SignUpActivity extends BaseActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
-                        if (user != null) {
-                            saveGoogleUserToFirestore(user);
+                        // Task 9: null-guard before any user operations
+                        if (user == null) {
+                            Toast.makeText(this, "Google sign-up failed. Please try again.", Toast.LENGTH_LONG).show();
+                            return;
                         }
+                        // Task 1 / Task 9: Persist profile to Firestore and register slot
+                        saveGoogleUserToFirestore(user);
+                        // Task 1: Register in AccountSlotManager so the drawer
+                        // header shows this account immediately after sign-up.
+                        AccountSlotManager.getInstance(this).registerCurrentUser(user);
+                        AppRepository.getInstance(this).upsertCurrentRanger();
+                        SyncScheduler.scheduleConfiguredSync(this);
+                        RealtimeSyncManager.getInstance(this).start();
                         FcmTokenManager.syncCurrentToken(this);
                         navigateToDashboard();
                     } else {
@@ -195,11 +235,16 @@ public class SignUpActivity extends BaseActivity {
     }
 
     private void saveGoogleUserToFirestore(FirebaseUser user) {
+        // Task 9: extra null-guard — user should never be null here but be defensive
+        if (user == null) return;
+
         Map<String, Object> data = new HashMap<>();
         data.put("fullName", user.getDisplayName() != null ? user.getDisplayName() : "");
-        data.put("email", user.getEmail() != null ? user.getEmail() : "");
+        data.put("email",    user.getEmail()        != null ? user.getEmail()        : "");
         data.put("createdAt", System.currentTimeMillis());
 
+        // SetOptions.merge() ensures we never overwrite existing fields (e.g. createdAt)
+        // if the user already has a Firestore profile from a previous sign-in.
         db.collection("users").document(user.getUid())
                 .set(data, com.google.firebase.firestore.SetOptions.merge());
     }

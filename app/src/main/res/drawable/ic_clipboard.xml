@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Clipboard / checklist icon — used for Patrol Logs -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Clipboard body -->
+    <path
+        android:pathData="M16,4H18A2,2 0,0 1,20,6V20A2,2 0,0 1,18,22H6A2,2 0,0 1,4,20V6A2,2 0,0 1,6,4H8"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF1A1A1A"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Clip at top -->
+    <path
+        android:pathData="M15,2H9A1,1 0,0 0,8,3V5A1,1 0,0 0,9,6H15A1,1 0,0 0,16,5V3A1,1 0,0 0,15,2Z"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF1A1A1A"
+        android:strokeWidth="1.8"
+        android:strokeLineJoin="round" />
+
+    <!-- Lines on clipboard -->
+    <path
+        android:pathData="M9,12H15M9,16H13"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF1A1A1A"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round" />
+
+</vector>

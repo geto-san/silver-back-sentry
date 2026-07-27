@@ -60,6 +60,34 @@ public final class SightingStore {
         return record;
     }
 
+    public static void updateSighting(Context context, SightingRecord record) {
+        JSONArray array = readArray(context);
+        for (int i = 0; i < array.length(); i++) {
+            try {
+                JSONObject obj = array.getJSONObject(i);
+                if (record.localId.equals(obj.optString("localId"))) {
+                    array.put(i, toJson(record));
+                    persistArray(context, array);
+                    return;
+                }
+            } catch (JSONException ignored) {}
+        }
+    }
+
+    public static void deleteSighting(Context context, String localId) {
+        JSONArray array = readArray(context);
+        JSONArray next = new JSONArray();
+        for (int i = 0; i < array.length(); i++) {
+            try {
+                JSONObject obj = array.getJSONObject(i);
+                if (!localId.equals(obj.optString("localId"))) {
+                    next.put(obj);
+                }
+            } catch (JSONException ignored) {}
+        }
+        persistArray(context, next);
+    }
+
     public static List<SightingRecord> getAll(Context context) {
         List<SightingRecord> records = readAll(context);
         Collections.sort(records, Comparator.comparingLong(r -> -r.timestamp));
@@ -117,6 +145,29 @@ public final class SightingStore {
         }
     }
 
+    public static void mergeRemoteRecords(Context context, List<SightingRecord> remoteRecords) {
+        List<SightingRecord> localRecords = readAll(context);
+        for (SightingRecord remote : remoteRecords) {
+            boolean found = false;
+            for (int i = 0; i < localRecords.size(); i++) {
+                SightingRecord local = localRecords.get(i);
+                if ((remote.firestoreId != null && remote.firestoreId.equals(local.firestoreId)) ||
+                    (remote.localId != null && remote.localId.equals(local.localId))) {
+                    // Update local if remote is newer or just overwrite
+                    localRecords.set(i, remote);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                localRecords.add(remote);
+            }
+        }
+        JSONArray array = new JSONArray();
+        for (SightingRecord r : localRecords) array.put(toJson(r));
+        persistArray(context, array);
+    }
+
     private static void appendRecord(Context context, SightingRecord record) {
         JSONArray array = readArray(context);
         array.put(toJson(record));
@@ -163,7 +214,7 @@ public final class SightingStore {
             obj.put("lat", record.lat);
             obj.put("lng", record.lng);
             obj.put("timestamp", record.timestamp);
-            obj.put("authorId", record.authorId);
+//            obj.put("authorId", record.authorId);
             obj.put("authorName", record.authorName);
             obj.put("syncStatus", record.syncStatus);
             obj.put("lastSyncAttempt", record.lastSyncAttempt);

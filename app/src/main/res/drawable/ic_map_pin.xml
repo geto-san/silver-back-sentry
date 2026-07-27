@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Map pin icon — used for Map menu item -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Pin body -->
+    <path
+        android:pathData="M21,10C21,16 12,22 12,22C12,22 3,16 3,10A9,9 0,0 1,21,10Z"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF1A1A1A"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Inner circle -->
+    <path
+        android:pathData="M12,7A3,3 0,1 0,12,13A3,3 0,0 0,12,7Z"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF1A1A1A"
+        android:strokeWidth="1.8" />
+
+</vector>

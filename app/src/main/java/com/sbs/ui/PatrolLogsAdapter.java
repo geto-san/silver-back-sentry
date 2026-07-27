@@ -7,102 +7,105 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.sbs.R;
-import com.sbs.data.AppSettingsManager;
 import com.sbs.data.PatrolLogRecord;
-import com.sbs.data.PatrolLogStore;
+import com.sbs.data.SyncState;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-public class PatrolLogsAdapter extends RecyclerView.Adapter<PatrolLogsAdapter.LogViewHolder> {
-
-    private final List<PatrolLogRecord> logs = new ArrayList<>();
-    private final AppSettingsManager appSettingsManager;
-    private final LogActionListener actionListener;
+public final class PatrolLogsAdapter extends ListAdapter<PatrolLogRecord, PatrolLogsAdapter.LogViewHolder> {
 
     public interface LogActionListener {
-        void onSyncNow(PatrolLogRecord record);
+        void onOpen(PatrolLogRecord record);
         void onDelete(PatrolLogRecord record);
         void onEdit(PatrolLogRecord record);
     }
 
-    public PatrolLogsAdapter(AppSettingsManager appSettingsManager, LogActionListener actionListener) {
-        this.appSettingsManager = appSettingsManager;
-        this.actionListener = actionListener;
-    }
+    private static final DiffUtil.ItemCallback<PatrolLogRecord> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<PatrolLogRecord>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull PatrolLogRecord oldItem, @NonNull PatrolLogRecord newItem) {
+                    return oldItem.localId.equals(newItem.localId);
+                }
 
-    public void submitList(List<PatrolLogRecord> records) {
-        logs.clear();
-        if (records != null) logs.addAll(records);
-        notifyDataSetChanged();
+                @Override
+                public boolean areContentsTheSame(@NonNull PatrolLogRecord oldItem, @NonNull PatrolLogRecord newItem) {
+                    return oldItem.timestamp == newItem.timestamp
+                            && sameText(oldItem.title, newItem.title)
+                            && sameText(oldItem.notes, newItem.notes)
+                            && sameText(oldItem.syncStatus, newItem.syncStatus);
+                }
+            };
+
+    private final LogActionListener actionListener;
+
+    public PatrolLogsAdapter(LogActionListener actionListener) {
+        super(DIFF_CALLBACK);
+        this.actionListener = actionListener;
     }
 
     @NonNull
     @Override
     public LogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_patrol_log_item, parent, false);
-        return new LogViewHolder(view);
+        return new LogViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_patrol_log_item, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull LogViewHolder holder, int position) {
-        holder.bind(logs.get(position));
+        holder.bind(getItem(position));
     }
 
-    @Override
-    public int getItemCount() { return logs.size(); }
-
-    class LogViewHolder extends RecyclerView.ViewHolder {
-        private final TextView tvTitle, tvAuthor, tvNotes, tvTimestamp, tvStatus;
-        private final View layoutActions;
-        private final Button btnSyncNow, btnDelete, btnEdit;
+    final class LogViewHolder extends RecyclerView.ViewHolder {
+        private final TextView title;
+        private final TextView author;
+        private final TextView notes;
+        private final TextView timestamp;
+        private final TextView status;
+        private final View actions;
+        private final Button edit;
+        private final Button delete;
 
         LogViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvTitle = itemView.findViewById(R.id.tvLogTitle);
-            tvAuthor = itemView.findViewById(R.id.tvLogAuthor);
-            tvNotes = itemView.findViewById(R.id.tvLogNotes);
-            tvTimestamp = itemView.findViewById(R.id.tvLogTimestamp);
-            tvStatus = itemView.findViewById(R.id.tvLogStatus);
-            layoutActions = itemView.findViewById(R.id.layoutLogActions);
-            btnSyncNow = itemView.findViewById(R.id.btnLogSyncNow);
-            btnDelete = itemView.findViewById(R.id.btnLogDelete);
-            btnEdit = itemView.findViewById(R.id.btnLogEdit);
+            title = itemView.findViewById(R.id.tvLogTitle);
+            author = itemView.findViewById(R.id.tvLogAuthor);
+            notes = itemView.findViewById(R.id.tvLogNotes);
+            timestamp = itemView.findViewById(R.id.tvLogTimestamp);
+            status = itemView.findViewById(R.id.tvLogStatus);
+            actions = itemView.findViewById(R.id.layoutLogActions);
+            edit = itemView.findViewById(R.id.btnLogEdit);
+            delete = itemView.findViewById(R.id.btnLogDelete);
         }
 
         void bind(PatrolLogRecord record) {
-            tvTitle.setText(record.title);
-            tvAuthor.setText("By: " + (record.authorName != null ? record.authorName : "Unknown"));
-            tvNotes.setText(record.notes == null || record.notes.isEmpty() ? "No notes" : record.notes);
-            tvTimestamp.setText(DateFormat.getDateTimeInstance().format(new Date(record.timestamp)));
-            tvStatus.setText(formatStatus(record.syncStatus));
+            title.setText(record.title);
+            author.setText("By: " + (record.authorName == null ? "Unknown" : record.authorName));
+            notes.setText(record.notes == null || record.notes.isEmpty() ? itemView.getContext().getString(R.string.no_notes) : record.notes);
+            timestamp.setText(DateFormat.getDateTimeInstance().format(new Date(record.timestamp)));
+            status.setText(formatStatus(record.syncStatus));
+            itemView.setOnClickListener(v -> actionListener.onOpen(record));
 
-            String currentUserId = FirebaseAuth.getInstance().getUid();
-            boolean isAuthor = currentUserId != null && currentUserId.equals(record.authorId);
-
-            if (isAuthor) {
-                layoutActions.setVisibility(View.VISIBLE);
-                btnSyncNow.setVisibility(!PatrolLogStore.STATUS_SYNCED.equals(record.syncStatus) 
-                        && !appSettingsManager.isAutoSyncEnabled() ? View.VISIBLE : View.GONE);
-                
-                btnSyncNow.setOnClickListener(v -> actionListener.onSyncNow(record));
-                btnDelete.setOnClickListener(v -> actionListener.onDelete(record));
-                btnEdit.setOnClickListener(v -> actionListener.onEdit(record));
-            } else {
-                layoutActions.setVisibility(View.GONE);
-            }
+            boolean canEdit = record.rangerId != null && record.rangerId.equals(FirebaseAuth.getInstance().getUid());
+            actions.setVisibility(canEdit ? View.VISIBLE : View.GONE);
+            edit.setOnClickListener(v -> actionListener.onEdit(record));
+            delete.setOnClickListener(v -> actionListener.onDelete(record));
         }
+    }
 
-        private String formatStatus(String status) {
-            if (PatrolLogStore.STATUS_SYNCED.equals(status)) return "Synced";
-            if (PatrolLogStore.STATUS_FAILED.equals(status)) return "Sync Failed";
-            return "Not Synced";
-        }
+    private static String formatStatus(String value) {
+        if (SyncState.SYNCED.equals(value)) return "Synced";
+        if (SyncState.SYNCING.equals(value)) return "Syncing";
+        if (SyncState.FAILED.equals(value)) return "Failed";
+        return "Pending";
+    }
+
+    private static boolean sameText(String left, String right) {
+        return left == null ? right == null : left.equals(right);
     }
 }

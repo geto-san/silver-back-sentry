@@ -12,16 +12,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.sbs.NetworkStatusMonitor;
+import com.sbs.util.NetworkStatusMonitor;
 import com.sbs.R;
-import com.sbs.data.AppSettingsManager;
-import com.sbs.data.SightingSyncManager;
-
 public abstract class BaseActivity extends AppCompatActivity implements NetworkStatusMonitor.NetworkStatusListener {
 
     protected NetworkStatusMonitor networkStatusMonitor;
     protected TextView tvNetworkStatus;
-    private boolean lastOnline = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,14 +56,6 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkS
         } else {
             tvNetworkStatus.setVisibility(View.GONE);
         }
-
-        if (isOnline && !lastOnline) {
-            AppSettingsManager settings = new AppSettingsManager(this);
-            if (settings.isAutoSyncEnabled()) {
-                SightingSyncManager.syncAllPending(this);
-            }
-        }
-        lastOnline = isOnline;
     }
 
     protected void applyWindowInsets(View view) {
